@@ -38,6 +38,7 @@ router.post('/', async (req, res) => {
     await db.query('INSERT INTO products SET ?', newProduct);
     res.status(201).json(newProduct);
   } catch (err) {
+    console.log(err);
     res.status(500).json({ message: err.message });
   }
 });
