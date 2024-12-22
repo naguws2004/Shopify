@@ -13,13 +13,13 @@ const apiProxy = httpProxy.createProxyServer();
 
 const services = {
     products: 'http://localhost:5001',
-    inventory: 'http://localhost:5001',
-    users: 'http://localhost:5002',
-    quiz: 'http://localhost:5003',
-    recommendations: 'http://localhost:5004',
-    orders: 'http://localhost:5005',
-    payments: 'http://localhost:5006',
-    shipping: 'http://localhost:5007'
+    inventory: 'http://localhost:5002',
+    users: 'http://localhost:5003',
+    quiz: 'http://localhost:5004',
+    recommendations: 'http://localhost:5005',
+    orders: 'http://localhost:5006',
+    payments: 'http://localhost:5007',
+    shipping: 'http://localhost:5008'
 };
 
 app.all('/api/:service/*', (req, res) => {

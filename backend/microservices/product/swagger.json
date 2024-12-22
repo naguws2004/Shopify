@@ -147,68 +147,6 @@
             }
           }
         }
-      },
-      "/api/inventory/update": {
-        "put": {
-          "summary": "Update inventories for a set of product IDs",
-          "tags": ["Products"],
-          "requestBody": {
-            "required": true,
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string",
-                        "description": "The product id"
-                      },
-                      "inventory": {
-                        "type": "integer",
-                        "description": "The new inventory count"
-                      }
-                    },
-                    "required": ["id", "inventory"]
-                  }
-                }
-              }
-            }
-          },
-          "responses": {
-            "200": {
-              "description": "Inventories updated for specified products",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "message": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "500": {
-              "description": "Internal server error",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "message": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
       }
     },
     "components": {
