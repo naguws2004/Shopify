@@ -1,0 +1,1 @@
+export const API_URL_USERS = 'http://localhost:5000/api/users'; // Replace with your actual API URL

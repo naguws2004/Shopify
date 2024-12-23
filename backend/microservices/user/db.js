@@ -5,7 +5,7 @@ const pool = mysql.createPool({
   port: 3306, // Replace with your MySQL port
   user: 'nagesh', // Replace with your MySQL user
   password: 'Qwerty1234!', // Replace with your MySQL password
-  database: 'shopify_products' // Replace with your MySQL database name
+  database: 'shopify_users' // Replace with your MySQL database name
 });
 
 pool.getConnection((err, connection) => {

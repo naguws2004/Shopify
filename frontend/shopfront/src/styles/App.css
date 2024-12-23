@@ -1,0 +1,59 @@
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+input {
+  margin: 1px;
+  padding: 5px;
+  width: 200px;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #2f4ad3;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #21a1f1;
+}
+
+button:disabled {
+  background-color:#2f4ad3;
+  color: grey;
+  cursor: not-allowed;
+}
+
+.App {
+  text-align: center;
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 20px;
+  color: white;
+}
+
+.clickable {
+  cursor: 'pointer';
+  text-decoration: 'underline';
+}
+
+.error {
+  color: red;
+}
