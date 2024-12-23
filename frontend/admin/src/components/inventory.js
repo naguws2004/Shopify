@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getProducts, updateProductInventory } from '../services/inventoryService';
 
-const Products = () => {
+const Inventory = () => {
   const [error, setError] = useState('');
   const [products, setProducts] = useState([]);
   const [updatedProducts, setUpdatedProducts] = useState([]);
@@ -52,7 +52,7 @@ const Products = () => {
   };
 
   const handleReset = () => {
-    const inventoryInputs = document.querySelectorAll('.inventory');
+    const inventoryInputs = document.querySelectorAll('.inventory-text');
     inventoryInputs.forEach(input => {
       input.value = 0;
     });
@@ -90,13 +90,13 @@ const Products = () => {
   return (
     <div>
       {error && <div className='error'>{error}</div>}
-      <div className="product">
-        <div className="product-list">
-        <div className='product-form-header'>
+      <div className="inventory">
+        <div className="inventory-list">
+        <div className='inventory-form-header'>
             <span>Hello Admin!</span>&nbsp;
             <button type="back" onClick={handleBack}>Back to Main</button>
         </div>
-        <div className='product-form-body'>
+        <div className='inventory-form-body'>
           <h2>Inventory</h2>
             <div>
               <label>Filter:</label>
@@ -113,7 +113,7 @@ const Products = () => {
                   <input type='text' value={element.description} readOnly />
                   <input type='text' value={element.price} readOnly />
                   <input type='text' value={element.inventory} readOnly />
-                  <input className='inventory' type='text' onChange={(e) => handleChange(e, element.id)} />
+                  <input className='inventory-text' type='text' onChange={(e) => handleChange(e, element.id)} />
                 </div>
               ))
             ) : (
@@ -121,7 +121,7 @@ const Products = () => {
             )}
             <br />
           </div>
-          <div className='product-form-footer'>
+          <div className='inventory-form-footer'>
             <button onClick={handleReset}>Reset</button>&nbsp;
             <button onClick={handleUpdateProductInventory} disabled={!isUpdateMode}>Update</button>&nbsp;
           </div>
@@ -131,4 +131,4 @@ const Products = () => {
   );
 };
 
-export default Products;
+export default Inventory;
