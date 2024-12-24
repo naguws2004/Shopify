@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import MainComponent from '../components/Main';
 
-function NotePage() {
+function MainPage() {
   const [error, setError] = useState('');
   const [id, setId] = useState(0);
   const [name, setName] = useState('');
@@ -12,15 +12,15 @@ function NotePage() {
   const timeoutRef = useRef(null);
   
   useEffect(() => {
-    const userCookie = Cookies.get('userInfo');
-    if (!userCookie) {
+    const userInfo = Cookies.get('userInfo');
+    if (!userInfo) {
       alert('User is not logged in');
       navigate('/');
       return;
     }
-    const user = JSON.parse(userCookie);
-    console.log(user.token);
-    setName(user.Name);
+    const user = JSON.parse(userInfo);
+    setId(user.id);
+    setName(user.name);
     setToken(user.token);
   }, [name]);
 
@@ -55,8 +55,7 @@ function NotePage() {
   };
 
   const handleSettings = () => {
-    alert('Settings clicked');
-    //window.history.back();
+    navigate('/settings');
   };
 
   const handleReset = () => {
@@ -78,4 +77,4 @@ function NotePage() {
   );
 }
 
-export default NotePage;
+export default MainPage;

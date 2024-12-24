@@ -4,7 +4,7 @@ import { getProducts, updateProductInventory } from '../services/inventoryServic
 const Inventory = () => {
   const [error, setError] = useState('');
   const [products, setProducts] = useState([]);
-  const [updatedProducts, setUpdatedProducts] = useState([]);
+  const [updatedProducts, setUpdatedProducts] = useState(products.map(product => ({ ...product, isUpdated: false })));
   const [isUpdateMode, setIsUpdateMode] = useState(false);
   const [filterText, setFilterText] = useState('');
 
@@ -43,7 +43,7 @@ const Inventory = () => {
 
   const handleUpdateProductInventory = async () => {
     try {
-      await updateProductInventory(updatedProducts);
+      await updateProductInventory(updatedProducts.filter(product => product.isUpdated));
       alert('Products Inventory updated successfully');
       await fetchProducts();
     } catch (err) {
@@ -74,7 +74,7 @@ const Inventory = () => {
     setUpdatedProducts((prevProducts) => {
       return prevProducts.map((product) => {
         if (product.id === id) {
-          return { ...product, inventory: inventory };
+          return { ...product, inventory: inventory, isUpdated: true };
         }
         return product;
       });

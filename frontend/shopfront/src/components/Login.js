@@ -2,7 +2,7 @@ import React from 'react';
 
 function Login({ email, setEmail, password, setPassword, handleSubmit }) {
   return (
-    <div className="Login">
+    <div className="main-form-body">
       <h2>Login</h2>
       <form onSubmit={handleSubmit}>
         <table>
@@ -34,6 +34,7 @@ function Login({ email, setEmail, password, setPassword, handleSubmit }) {
           </tr>
           <tr>
             <td colSpan="2">
+              <br />
               <button type="submit">Login</button>
             </td>
           </tr>

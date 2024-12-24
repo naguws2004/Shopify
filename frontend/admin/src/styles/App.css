@@ -163,6 +163,59 @@ button:disabled {
   color: red;
 }
 
+.user {
+  display: grid;
+  grid-template-columns: auto;
+  grid-template-rows: auto 1fr;
+  gap: 6px;
+}
+
+.user-list {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  height: 655px;
+  overflow-y: auto;
+}
+
+.user-form {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center; 
+}
+
+.user-form-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center; 
+}
+
+.user-form-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center; 
+}
+
+.user-form-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center; 
+}
+
+.user-form-table {
+  width: 400px;
+}
+
+.user-text {
+  margin: 1px;
+  padding: 5px;
+  width: 200px;
+}
+
 .clickable {
   cursor: 'pointer';
   text-decoration: 'underline';

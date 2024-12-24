@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-function Register({ name, setName, email, setEmail, password, setPassword, password1, setPassword1, handleSubmit, handleCancel }) {
+function Setting({ name, setName, password, setPassword, password1, setPassword1, handleSubmit, handleCancel }) {
+  const [changePassword, setChangePassword] = useState(false);
   return (
     <div className="main-form-body">
-      <h2>Registration</h2>
+      <h2>Settings</h2>
       <form onSubmit={handleSubmit}>
         <table>
           <tr>
@@ -20,16 +21,15 @@ function Register({ name, setName, email, setEmail, password, setPassword, passw
             </td>
           </tr>
           <tr>
-            <td>
-              <label>Email:</label>
-            </td>
-            <td>
+            <td colSpan="2">
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+                type="checkbox"
+                checked={changePassword}
+                onChange={(e) => setChangePassword(e.target.checked)}
               />
+              <label>
+                Change Password
+              </label>
             </td>
           </tr>
           <tr>
@@ -41,7 +41,8 @@ function Register({ name, setName, email, setEmail, password, setPassword, passw
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required
+                disabled={!changePassword}
+                required={changePassword}
               />
             </td>
           </tr>
@@ -54,14 +55,15 @@ function Register({ name, setName, email, setEmail, password, setPassword, passw
                 type="password"
                 value={password1}
                 onChange={(e) => setPassword1(e.target.value)}
-                required
+                disabled={!changePassword}
+                required={changePassword}
               />
             </td>
           </tr>
           <tr>
             <td colSpan="2">
               <br />
-              <button type="submit">Register</button>&nbsp;
+              <button type="submit">Update</button>&nbsp;
               <button type="cancel" onClick={handleCancel}>Cancel</button>
             </td>
           </tr>
@@ -71,4 +73,4 @@ function Register({ name, setName, email, setEmail, password, setPassword, passw
   );
 }
 
-export default Register;
+export default Setting;

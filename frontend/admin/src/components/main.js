@@ -12,6 +12,10 @@ const Main = () => {
     navigate('/inventory');
   };
 
+  const handleUsers = () => {
+    navigate('/users');
+  };
+
   return (
     <div className="App-main">
       <header className="App-header-main">
@@ -22,6 +26,9 @@ const Main = () => {
         </div>
         <div>
           <button className='button-main' onClick={handleInventory}>Inventory</button>
+        </div>
+        <div>
+          <button className='button-main' onClick={handleUsers}>Users</button>
         </div>
       </header>
     </div>

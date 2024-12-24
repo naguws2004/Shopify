@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
 const db = require('./db');
-const { createUser, updateUser, updateUserPassword } = require('./common');
+const { createUser, updateUser, updateUserPassword, getUserById } = require('./common');
 
 // Middleware to validate JWT token
 const validateToken = (req, res, next) => { 
@@ -17,7 +17,7 @@ const validateToken = (req, res, next) => {
 
   jwt.verify(token, 'your_jwt_secret', (err, user) => {
       if (err) {
-          return res.sendStatus(403); // Forbidden
+        return res.sendStatus(403); // Forbidden
       }
       req.user = user;
       next();
@@ -33,12 +33,12 @@ router.get('/login', async (req, res) => {
     if (rows.length > 0) {
       let isMatch = false;
       for (const user of rows) {
-          isMatch = await bcrypt.compare(password, user.hashed_password);
-          if (isMatch) {
-              // Generate JWT token
-              const token = jwt.sign({ id: user.id, name: user.Name, email: user.email }, 'your_jwt_secret', { expiresIn: '1h' });
-              return res.status(200).json({ ...user, token });
-          }
+        isMatch = await bcrypt.compare(password, user.hashed_password);
+        if (isMatch) {
+            // Generate JWT token
+            const token = jwt.sign({ id: user.id, name: user.Name, email: user.email }, 'your_jwt_secret', { expiresIn: '1h' });
+            return res.status(200).json({ ...user, token });
+        }
       }
       if (!isMatch) return res.status(404).json({ message: 'Password is incorrect' });
     } else {
@@ -52,6 +52,11 @@ router.get('/login', async (req, res) => {
 // Register a new user
 router.post('/register', async (req, res) => {
   await createUser(req, res);
+});
+
+// Get user by id
+router.get('/:id', validateToken, async (req, res) => {
+  await getUserById(req, res);
 });
 
 // Update a user

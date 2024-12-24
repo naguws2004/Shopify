@@ -22,3 +22,45 @@ export const login = async (email, password) => {
     throw new Error('Login failed');
   }
 };
+
+export const getUserById = async (token, id) => {
+  try {
+    const response = await axios.get(`${API_URL_USERS}/${id}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to get user');
+  }
+};
+
+export const updateUser = async (token, id, user) => {
+  try {
+    const response = await axios.put(`${API_URL_USERS}/${id}`, user, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to update user');
+  }
+};
+
+export const updateUserPassword = async (token, id, user) => {
+  try {
+    const response = await axios.put(`${API_URL_USERS}/password/${id}`, user, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to update user');
+  }
+};

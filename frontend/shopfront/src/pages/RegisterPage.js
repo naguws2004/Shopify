@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import RegisterComponent from '../components/Register';
 import { validateEmail } from '../utils/helper';
 import { register } from '../services/authService';
@@ -10,7 +9,6 @@ function RegisterPage() {
   const [password, setPassword] = useState('');
   const [password1, setPassword1] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,7 +36,6 @@ function RegisterPage() {
       await register(name, email, password);
       setError('');
       // show success message
-      console.log('Registered with:', { name, email, password });
       alert('Registered successfully');
       // Redirect to login page
       window.history.back();

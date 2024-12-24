@@ -2,12 +2,12 @@
 const express = require('express');
 const router = express.Router();
 const db = require('./db');
-const { createUser, updateUser, updateUserPassword } = require('./common');
+const { createUser, updateUser, updateUserPassword, getUserById } = require('./common');
 
 // Get all users
 router.get('/', async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM users');
+    const [rows] = await db.query('SELECT id, name, email FROM users');
     res.json(rows);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -16,16 +16,7 @@ router.get('/', async (req, res) => {
 
 // Get user by id
 router.get('/:id', async (req, res) => {
-  try {
-    const [rows] = await db.query('SELECT * FROM users WHERE id = ?', [req.params.id]);
-    if (rows.length > 0) {
-      res.json(rows[0]);
-    } else {
-      res.status(404).json({ message: 'User not found' });
-    }
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
+  await getUserById(req, res);
 });
 
 // Create a new user
