@@ -1,18 +1,16 @@
 const express = require('express');
 const cors = require('cors');
-const userRouter = require('./user.service'); 
-const adminUserRouter = require('./admin.user.service'); 
+const cartRouter = require('./cart.service'); 
 const swaggerSetup = require('./swagger');
 
 const app = express();
-const port = 5001; // Replace with your desired port
+const port = 5004; // Replace with your desired port
 
 // Enable CORS for all origins
 app.use(cors());
 
 app.use(express.json()); // Parse incoming JSON requests
-app.use('/api/users', userRouter); 
-app.use('/api/adminUsers', adminUserRouter); 
+app.use('/api/cart', cartRouter);
 
 // Setup Swagger
 swaggerSetup(app);

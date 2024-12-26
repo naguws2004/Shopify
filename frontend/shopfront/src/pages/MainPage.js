@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import MainComponent from '../components/Main';
+import { saveCart } from '../services/cartService';
 
 function MainPage() {
   const [error, setError] = useState('');
@@ -75,8 +76,14 @@ function MainPage() {
   };
   
   const handleSaveProceed = () => {
-    alert(id);
-    alert(JSON.stringify(cart));
+    try {
+      cart.forEach(async (item) => {
+        await saveCart(token, id, item);
+    });
+    } catch (err) {
+      setError(err.message);
+    }
+    alert('Cart saved successfully');
   };
 
   const handleReset = () => {

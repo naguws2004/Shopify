@@ -12,16 +12,16 @@ const port = 5000; // Replace with your desired port
 const apiProxy = httpProxy.createProxyServer();
 
 const services = {
-    products: 'http://localhost:5001',
-    inventory: 'http://localhost:5002',
-    adminUsers: 'http://localhost:5003',
-    users: 'http://localhost:5003',
-    cart: 'http://localhost:5003',
-    quiz: 'http://localhost:5004',
-    recommendations: 'http://localhost:5005',
-    orders: 'http://localhost:5006',
-    payments: 'http://localhost:5007',
-    shipping: 'http://localhost:5008'
+    users: 'http://localhost:5001',
+    adminUsers: 'http://localhost:5001',
+    products: 'http://localhost:5002',
+    inventory: 'http://localhost:5003',
+    cart: 'http://localhost:5004',
+    quiz: 'http://localhost:5005',
+    recommendations: 'http://localhost:5006',
+    orders: 'http://localhost:5007',
+    payments: 'http://localhost:5008',
+    shipping: 'http://localhost:5009'
 };
 
 app.all('/api/:service/*', (req, res) => {

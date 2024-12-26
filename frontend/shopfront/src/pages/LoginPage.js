@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import { useNavigate, Link } from 'react-router-dom';
 import { login } from '../services/authService';
+import { getCartByUserId } from '../services/cartService';
 import LoginComponent from '../components/Login';
 
 function LoginPage() {
@@ -21,6 +22,11 @@ function LoginPage() {
       setError('');
       Cookies.set('userInfo', JSON.stringify(userInfo), { expires: 1 }); // Set token cookie for 1 day
       alert('Logged in successfully');
+      const cart = await getCartByUserId(userInfo.token, userInfo.id);
+      if (cart.length > 0) {
+        alert('Cart has been restored');
+        return;
+      }
       navigate('/main');
     } catch (err) {
       setError(err.message);

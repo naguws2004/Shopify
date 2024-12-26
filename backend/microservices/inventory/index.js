@@ -4,7 +4,7 @@ const inventoryRouter = require('./inventory.service');
 const swaggerSetup = require('./swagger');
 
 const app = express();
-const port = 5002; // Replace with your desired port
+const port = 5003; // Replace with your desired port
 
 // Enable CORS for all origins
 app.use(cors());

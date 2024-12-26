@@ -2,8 +2,26 @@ const express = require('express');
 const router = express.Router();
 const db = require('./db');
 
+// Middleware to validate JWT token
+const validateToken = (req, res, next) => { 
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  
+  if (!token) {
+      return res.sendStatus(401); // Unauthorized
+  }
+
+  jwt.verify(token, 'your_jwt_secret', (err, user) => {
+      if (err) {
+        return res.sendStatus(403); // Forbidden
+      }
+      req.user = user;
+      next();
+  });
+}
+
 // Get all products in the cart for a user
-router.get('/:user_id', async (req, res) => {
+router.get('/:user_id', validateToken, async (req, res) => {
     const { user_id } = req.params;
 
     try {
@@ -18,7 +36,7 @@ router.get('/:user_id', async (req, res) => {
 });
   
 // Add a product to the cart
-router.post('/', async (req, res) => {
+router.post('/', validateToken, async (req, res) => {
   const { user_id, product_id } = req.body;
 
   try {
@@ -37,7 +55,7 @@ router.post('/', async (req, res) => {
 });
 
 // Remove a product from the cart for a user
-router.delete('/:user_id', async (req, res) => {
+router.delete('/:user_id', validateToken, async (req, res) => {
     const { user_id } = req.params;
 
   try {

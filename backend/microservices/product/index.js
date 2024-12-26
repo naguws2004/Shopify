@@ -4,7 +4,7 @@ const productRouter = require('./product.service');
 const swaggerSetup = require('./swagger');
 
 const app = express();
-const port = 5001; // Replace with your desired port
+const port = 5002; // Replace with your desired port
 
 // Enable CORS for all origins
 app.use(cors());

@@ -351,105 +351,6 @@
           }
         }
       }
-    },
-    "/api/cart": {
-      "post": {
-        "summary": "Add a product to the cart",
-        "tags": ["Cart"],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Cart"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Product added to cart successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Cart"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Failed to add product to cart"
-          }
-        }
-      }
-    },
-    "/api/cart/{user_id}": {
-      "get": {
-        "summary": "Get all products in the cart for a user",
-        "tags": ["Cart"],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "user_id",
-            "schema": {
-              "type": "integer"
-            },
-            "required": true,
-            "description": "The ID of the user"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "A list of products in the cart",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Cart"
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "An error occurred while retrieving the cart"
-          }
-        }
-      },
-      "delete": {
-        "summary": "Remove a product from the cart",
-        "tags": ["Cart"],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "user_id",
-            "schema": {
-              "type": "integer"
-            },
-            "required": true,
-            "description": "The ID of the user"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Product removed from cart successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Cart"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Product not found in cart"
-          },
-          "500": {
-            "description": "An error occurred while removing the product from the cart"
-          }
-        }
-      }
     }
   },
   "components": {
@@ -487,24 +388,6 @@
           "name": "John Doe",
           "email": "john.doe@example.com",
           "password": "Qwerty123"
-        }
-      },
-      "Cart": {
-        "type": "object",
-        "required": ["user_id", "product_id"],
-        "properties": {
-          "user_id": {
-            "type": "integer",
-            "description": "The ID of the user"
-          },
-          "product_id": {
-            "type": "integer",
-            "description": "The ID of the product"
-          }
-        },
-        "example": {
-          "user_id": 1,
-          "product_id": 1
         }
       }
     }
