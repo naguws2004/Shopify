@@ -18,17 +18,14 @@ const Products = () => {
   const [id, setId] = useState('');
   const [isUpdateMode, setIsUpdateMode] = useState(false);
   const [filterText, setFilterText] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const fetchProducts = async () => {
     try {
-      const fetchedProducts = await getProducts();
-      if (!filterText) {
-        setProducts(fetchedProducts);
-        handleReset();
-        return;
-      }
-      const filteredProducts = fetchedProducts.filter(product => product.name.toLowerCase().includes(filterText.trim().toLowerCase()));
-      setProducts(filteredProducts);
+      const fetchedProducts = await getProducts(page, filterText.trim());
+      setProducts(fetchedProducts.products);
+      setTotalPages(fetchedProducts.pages);
       handleReset();
     } catch (err) {
       setError(err.message);
@@ -37,11 +34,15 @@ const Products = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [page]);
 
   useEffect(() => {
     fetchProducts();
   }, [filterText]);
+ 
+  useEffect(() => {
+    handleReset();
+  }, [products]);
 
   const validData = () => {
     if (!product.name.trim()) {
@@ -131,6 +132,10 @@ const Products = () => {
   const handleFilterTextChange = (e) => {
     setFilterText(e.target.value);
   };
+  
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+  };
 
   return (
     <div>
@@ -142,17 +147,27 @@ const Products = () => {
             <label>Filter:</label>
             <input type='text' placeholder="Product Name" value={filterText} 
             onChange={handleFilterTextChange} />
-          </div>
-          <br />
+          </div><br />
           {Array.isArray(products) && products.length > 0 ? (
             products.map((element, index) => (
-              <div style={{ cursor: 'pointer', textDecoration: 'underline' }} key={element.id} onClick={() => handleProductClick(element.id)}>
-                {element.name} - {element.company} - {element.category} - {element.price} - {element.inventory}
+              <div key={element.id}>
+                {index + ((page-1)*10) + 1}.&nbsp;
+                <input type='text' value={element.name} readOnly />
+                <input type='text' value={element.company} readOnly />
+                <input type='text' value={element.category} readOnly />
+                <input type='text' value={element.description} readOnly />
+                <button onClick={() => handleProductClick(element.id)}>Edit</button>
               </div>
             ))
           ) : (
             <p>No products available</p>
           )}
+          <br />
+          <div>
+            <button onClick={() => handlePageChange(page - 1)} disabled={page === 1}>Previous</button>&nbsp;
+            <span>Page {page} of {totalPages}</span>&nbsp;
+            <button onClick={() => handlePageChange(page + 1)} disabled={page === totalPages}>Next</button>
+          </div>
         </div>
         <div className='product-form'>
           <div className='product-form-header'>

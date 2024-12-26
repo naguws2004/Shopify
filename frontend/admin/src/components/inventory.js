@@ -7,17 +7,14 @@ const Inventory = () => {
   const [updatedProducts, setUpdatedProducts] = useState(products.map(product => ({ ...product, isUpdated: false })));
   const [isUpdateMode, setIsUpdateMode] = useState(false);
   const [filterText, setFilterText] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const fetchProducts = async () => {
     try {
-      const fetchedProducts = await getProducts();
-      if (!filterText) {
-        setProducts(fetchedProducts);
-        handleReset();
-        return;
-      }
-      const filteredProducts = fetchedProducts.filter(product => product.name.toLowerCase().includes(filterText.trim().toLowerCase()));
-      setProducts(filteredProducts);
+      const fetchedProducts = await getProducts(page, filterText.trim());
+      setProducts(fetchedProducts.products);
+      setTotalPages(fetchedProducts.pages);
       handleReset();
     } catch (err) {
       setError(err.message);
@@ -26,7 +23,7 @@ const Inventory = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [page]);
 
   useEffect(() => {
     fetchProducts();
@@ -86,6 +83,10 @@ const Inventory = () => {
   const handleFilterTextChange = (e) => {
     setFilterText(e.target.value);
   };
+  
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+  };
 
   return (
     <div>
@@ -106,7 +107,7 @@ const Inventory = () => {
             {Array.isArray(products) && products.length > 0 ? (
               products.map((element, index) => (
                 <div key={element.id}>
-                  {index + 1}.&nbsp;
+                  {index + ((page-1)*10) + 1}.&nbsp;
                   <input type='text' value={element.name} readOnly />
                   <input type='text' value={element.company} readOnly />
                   <input type='text' value={element.category} readOnly />
@@ -119,6 +120,12 @@ const Inventory = () => {
             ) : (
               <p>No products available</p>
             )}
+            <br />
+            <div>
+              <button onClick={() => handlePageChange(page - 1)} disabled={page === 1}>Previous</button>&nbsp;
+              <span>Page {page} of {totalPages}</span>&nbsp;
+              <button onClick={() => handlePageChange(page + 1)} disabled={page === totalPages}>Next</button>
+            </div>
             <br />
           </div>
           <div className='inventory-form-footer'>

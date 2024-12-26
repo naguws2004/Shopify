@@ -5,6 +5,8 @@ import MainComponent from '../components/Main';
 
 function MainPage() {
   const [error, setError] = useState('');
+  const [cart, setCart] = useState([]);
+  const [products, setProducts] = useState([]);
   const [id, setId] = useState(0);
   const [name, setName] = useState('');
   const [token, setToken] = useState('');
@@ -24,29 +26,29 @@ function MainPage() {
     setToken(user.token);
   }, [name]);
 
-  useEffect(() => {
-    const handleActivity = () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-      timeoutRef.current = setTimeout(() => {
-        handleLogout();
-      }, 60000); // 1 minute
-    };
+  // useEffect(() => {
+  //   const handleActivity = () => {
+  //     if (timeoutRef.current) {
+  //       clearTimeout(timeoutRef.current);
+  //     }
+  //     timeoutRef.current = setTimeout(() => {
+  //       handleLogout();
+  //     }, 60000); // 1 minute
+  //   };
 
-    window.addEventListener('mousemove', handleActivity);
-    window.addEventListener('keydown', handleActivity);
+  //   window.addEventListener('mousemove', handleActivity);
+  //   window.addEventListener('keydown', handleActivity);
 
-    handleActivity(); // Initialize the timeout
+  //   handleActivity(); // Initialize the timeout
 
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-      window.removeEventListener('mousemove', handleActivity);
-      window.removeEventListener('keydown', handleActivity);
-    };
-  }, []);
+  //   return () => {
+  //     if (timeoutRef.current) {
+  //       clearTimeout(timeoutRef.current);
+  //     }
+  //     window.removeEventListener('mousemove', handleActivity);
+  //     window.removeEventListener('keydown', handleActivity);
+  //   };
+  // }, []);
 
   const handleLogout = () => {
     handleReset();
@@ -56,6 +58,25 @@ function MainPage() {
 
   const handleSettings = () => {
     navigate('/settings');
+  };
+ 
+  const handleAddToCart = (id) => {
+    setCart((prevCart) =>
+      prevCart.includes(id) ? prevCart.filter((item) => item !== id) : [...prevCart, id]
+    );
+  };
+ 
+  const handleShowDetails = (id) => {
+    navigate(`/product/${id}`);
+  };
+  
+  const handleResetCart = () => {
+    setCart([]);
+  };
+  
+  const handleSaveProceed = () => {
+    alert(id);
+    alert(JSON.stringify(cart));
   };
 
   const handleReset = () => {
@@ -68,9 +89,17 @@ function MainPage() {
       {error && <div className='error'>{error}</div>}
       <div>
         <MainComponent 
+          cart={cart}
+          setCart={setCart}
+          products={products}
+          setProducts={setProducts}
           name={name} 
           handleSettings={handleSettings} 
           handleLogout={handleLogout} 
+          handleAddToCart={handleAddToCart}
+          handleShowDetails={handleShowDetails}
+          handleSaveProceed={handleSaveProceed}
+          handleResetCart={handleResetCart}
         />
       </div>
     </div>

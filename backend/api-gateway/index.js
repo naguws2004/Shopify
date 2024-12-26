@@ -16,6 +16,7 @@ const services = {
     inventory: 'http://localhost:5002',
     adminUsers: 'http://localhost:5003',
     users: 'http://localhost:5003',
+    cart: 'http://localhost:5003',
     quiz: 'http://localhost:5004',
     recommendations: 'http://localhost:5005',
     orders: 'http://localhost:5006',

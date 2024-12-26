@@ -18,6 +18,7 @@ input {
 }
 
 button {
+  margin: 2px;
   padding: 10px 20px;
   background-color: #2f4ad3;
   border: none;
@@ -44,6 +45,32 @@ button:disabled {
   min-height: 100vh;
   font-size: 16px;
   color: white;
+}
+
+.add-to-cart {
+  margin: 2px;
+  padding: 10px 20px;
+  background-color: green;
+  color: white;
+  border: none;
+}
+
+.add-to-cart:hover {
+  background-color: darkgreen;
+  color: lightgreen;
+}
+
+.remove-from-cart {
+  margin: 2px;
+  padding: 10px 20px;
+  background-color: red;
+  color: white;
+  border: none;
+}
+
+.remove-from-cart:hover {
+  background-color: darkred;
+  color: lightcoral;
 }
 
 .main-form-header {

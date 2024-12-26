@@ -10,6 +10,47 @@
         "get": {
           "summary": "Returns the list of all the products",
           "tags": ["Products"],
+          "parameters": [
+            {
+              "name": "page",
+              "in": "query",
+              "description": "Page number",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "default": 1
+              }
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "description": "Number of items per page",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "default": 10
+              }
+            },
+            {
+              "name": "filterText",
+              "in": "query",
+              "description": "Text to filter products by name",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "includeQty",
+              "in": "query",
+              "description": "Include quantity in the response",
+              "required": false,
+              "schema": {
+                "type": "boolean",
+                "default": false
+              }
+            }
+          ],
           "responses": {
             "200": {
               "description": "The list of the products",
@@ -62,7 +103,7 @@
               "in": "path",
               "name": "id",
               "schema": {
-                "type": "string"
+                "type": "integer"
               },
               "required": true,
               "description": "The product id"
@@ -92,7 +133,7 @@
               "in": "path",
               "name": "id",
               "schema": {
-                "type": "string"
+                "type": "integer"
               },
               "required": true,
               "description": "The product id"
@@ -132,7 +173,7 @@
               "in": "path",
               "name": "id",
               "schema": {
-                "type": "string"
+                "type": "integer"
               },
               "required": true,
               "description": "The product id"
@@ -156,7 +197,7 @@
         "required": ["name", "company", "category", "price", "inventory"],
         "properties": {
           "id": {
-            "type": "string",
+            "type": "integer",
             "description": "The auto-generated id of the product"
           },
           "name": {
@@ -193,7 +234,7 @@
           }
         },
         "example": {
-          "id": "d5fE_asz",
+          "id": 1,
           "name": "Product A",
           "description": "Description of Product A",
           "company": "Company A",

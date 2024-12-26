@@ -15,15 +15,29 @@ export const createProduct = async (product) => {
   }
 };
 
-export const getProducts = async () => {
+export const getProducts = async (page, filterText) => {
+  const limit = 10;
   try {
     const response = await axios.get(`${API_URL}/api/products/`, {
       headers: {
         'Content-Type': 'application/json'
       },
+      params: {
+        page,
+        limit,
+        filterText: filterText.trim(),
+        includeQty: false
+      }
     });
-    return response.data;
+    const { products, total, pages } = response.data;
+    return {
+      products,
+      total,
+      page,
+      pages
+    };
   } catch (error) {
+    alert(error);
     throw new Error('Failed to fetch products');
   }
 };

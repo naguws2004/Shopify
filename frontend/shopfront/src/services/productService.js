@@ -1,10 +1,10 @@
 import axios from 'axios';
-import { API_URL } from '../common/constants';
+import { API_URL_PRODUCTS } from '../common/constants';
 
 export const getProducts = async (page, filterText) => {
-  const limit = 10;
+  const limit = 8;
   try {
-    const response = await axios.get(`${API_URL}/api/products/`, {
+    const response = await axios.get(`${API_URL_PRODUCTS}/`, {
       headers: {
         'Content-Type': 'application/json'
       },
@@ -12,7 +12,7 @@ export const getProducts = async (page, filterText) => {
         page,
         limit,
         filterText: filterText.trim(),
-        includeQty: false
+        includeQty: true
       }
     });
     const { products, total, pages } = response.data;
@@ -27,15 +27,15 @@ export const getProducts = async (page, filterText) => {
   }
 };
 
-export const updateProductInventory = async (updatedProducts) => {
+export const getProduct = async (id) => {
   try {
-    const response = await axios.put(`${API_URL}/api/inventory/update/`, updatedProducts, {
+    const response = await axios.get(`${API_URL_PRODUCTS}/${id}`, {
       headers: {
         'Content-Type': 'application/json'
       },
     });
     return response.data;
   } catch (error) {
-    throw new Error('Failed to update product inventory');
+    throw new Error('Failed to fetch product');
   }
 };

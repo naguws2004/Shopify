@@ -20,7 +20,7 @@
                     "type": "object",
                     "properties": {
                       "id": {
-                        "type": "string",
+                        "type": "integer",
                         "description": "The product id"
                       },
                       "inventory": {
@@ -76,7 +76,7 @@
         "required": ["name", "company", "category", "price", "inventory"],
         "properties": {
           "id": {
-            "type": "string",
+            "type": "integer",
             "description": "The auto-generated id of the product"
           },
           "name": {
