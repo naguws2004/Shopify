@@ -211,4 +211,96 @@ router.put('/inventory/update', async (req, res) => {
   }
 });
 
+// Get all orders
+router.get('/orders', async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const filterText = req.query.filterText || '';
+  const filterOrderId = req.query.filterOrderId || '';
+  const offset = (page - 1) * limit;
+
+  try {
+    let rows;
+    let countResult;
+    if (filterOrderId) {
+      if (filterText) {
+        [rows] = await db.query('SELECT o.id, order_date, name, email, payment_date, dispatch_date, cancelled_date, status FROM orders o INNER JOIN users u ON o.user_id = u.id WHERE o.id = ? AND LOWER(name) LIKE ? ORDER BY order_date DESC, o.id LIMIT ? OFFSET ?', [filterOrderId, `%${filterText.toLowerCase()}%`, limit, offset]);
+        [countResult] = await db.query('SELECT COUNT(*) as count FROM orders o INNER JOIN users u ON o.user_id = u.id WHERE o.id = ? AND LOWER(name) LIKE ? ', [filterOrderId, `%${filterText.toLowerCase()}%`]);
+      } else {
+        [rows] = await db.query('SELECT o.id, order_date, name, email, payment_date, dispatch_date, cancelled_date, status FROM orders o INNER JOIN users u ON o.user_id = u.id WHERE o.id = ? ORDER BY order_date DESC, o.id LIMIT ? OFFSET ?', [filterOrderId, limit, offset]);
+        [countResult] = await db.query('SELECT COUNT(*) as count FROM orders WHERE id = ?', [filterOrderId]);
+      }
+    } else {
+      if (filterText) {
+        [rows] = await db.query('SELECT o.id, order_date, name, email, payment_date, dispatch_date, cancelled_date, status FROM orders o INNER JOIN users u ON o.user_id = u.id WHERE LOWER(name) LIKE ? ORDER BY order_date DESC, o.id LIMIT ? OFFSET ?', [`%${filterText.toLowerCase()}%`, limit, offset]);
+        [countResult] = await db.query('SELECT COUNT(*) as count FROM orders o INNER JOIN users u ON o.user_id = u.id WHERE LOWER(name) LIKE ? ', [`%${filterText.toLowerCase()}%`]);
+      } else {
+        [rows] = await db.query('SELECT o.id, order_date, name, email, payment_date, dispatch_date, cancelled_date, status FROM orders o INNER JOIN users u ON o.user_id = u.id ORDER BY order_date DESC, o.id LIMIT ? OFFSET ?', [limit, offset]);
+        [countResult] = await db.query('SELECT COUNT(*) as count FROM orders');
+      }
+    }
+    const totalItems = countResult[0].count;
+    const totalPages = Math.ceil(totalItems / limit);
+
+    res.json({
+      orders: rows,
+      total: totalItems,
+      page: page,
+      pages: totalPages
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get order
+router.get('/orders/:order_id', async (req, res) => {
+    const { order_id } = req.params;
+
+    try {
+        const query = 'SELECT * FROM orders o INNER JOIN users u ON o.user_id = u.id WHERE o.id = ?';
+        const params = [order_id];
+
+        const [rows] = await db.query(query, params);
+        res.status(200).json(rows);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// Get order details
+router.get('/orders/details/:order_id', async (req, res) => {
+  const { order_id } = req.params;
+
+  try {
+      const query = 'SELECT * FROM order_details o INNER JOIN products p ON o.product_id = p.id WHERE o.id = ?';
+      const params = [order_id];
+
+      const [rows] = await db.query(query, params);
+      res.status(200).json(rows);
+  } catch (err) {
+      res.status(500).json({ message: err.message });
+  }
+});
+
+// Update an order 
+router.put('/cancel/:order_id', async (req, res) => {
+    const { order_id } = req.params;
+
+  try {
+    const params = [order_id];
+
+    const query = 'UPDATE orders SET cancelled_date = CURDATE(), status = \'CANCELLED\' WHERE id = ?';
+    const [result] = await db.query(query, params);
+
+    if (result.affectedRows > 0) {
+        res.status(200).json({ message: 'order updated successfully' });
+    } else {
+      res.status(404).json({ message: 'order not found' });
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

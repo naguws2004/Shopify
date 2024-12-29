@@ -4,6 +4,10 @@ import '../styles/App.css';
 const Main = () => {
   const navigate = useNavigate();
 
+  const handleUsers = () => {
+    navigate('/users');
+  };
+
   const handleProducts = () => {
     navigate('/products');
   };
@@ -12,8 +16,8 @@ const Main = () => {
     navigate('/inventory');
   };
 
-  const handleUsers = () => {
-    navigate('/users');
+  const handleOrders = () => {
+    navigate('/orders');
   };
 
   return (
@@ -31,7 +35,7 @@ const Main = () => {
           <button className='button-main' onClick={handleInventory}>Inventory</button>
         </div>
         <div>
-          <button className='button-main' onClick={handleUsers}>Orders</button>
+          <button className='button-main' onClick={handleOrders}>Orders</button>
         </div>
       </header>
     </div>
