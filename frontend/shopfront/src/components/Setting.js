@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-function Setting({ name, setName, password, setPassword, password1, setPassword1, handleSubmit, handleCancel }) {
-  const [changePassword, setChangePassword] = useState(false);
+function Setting({ name, setName, password, setPassword, password1, setPassword1, changePassword, setChangePassword, handleSubmit, handleCancel }) {
   return (
     <div className="main-form-body">
       <h2>Settings</h2>

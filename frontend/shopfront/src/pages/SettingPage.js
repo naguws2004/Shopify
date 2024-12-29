@@ -4,12 +4,13 @@ import SettingComponent from '../components/Setting';
 import { updateUser, updateUserPassword } from '../services/authService';
 
 function SettingPage() {
+  const [error, setError] = useState('');
   const [id, setId] = useState(0);
   const [name, setName] = useState('');
   const [token, setToken] = useState('');
   const [password, setPassword] = useState('');
   const [password1, setPassword1] = useState('');
-  const [error, setError] = useState('');
+  const [changePassword, setChangePassword] = useState(false);
   
   useEffect(() => {
     const userInfo = Cookies.get('userInfo');
@@ -68,6 +69,8 @@ function SettingPage() {
           setPassword={setPassword} 
           password1={password1} 
           setPassword1={setPassword1} 
+          changePassword={changePassword}
+          setChangePassword={setChangePassword}
           handleSubmit={handleSubmit} 
           handleCancel={handleCancel} 
         />

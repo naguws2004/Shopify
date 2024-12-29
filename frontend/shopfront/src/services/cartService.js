@@ -31,3 +31,17 @@ export const getCartByUserId = async (token, user_id) => {
     throw new Error('Failed to get cart');
   }
 };
+
+export const deleteCartByUserId = async (token, user_id) => {
+  try {
+    const response = await axios.delete(`${API_URL_CART}/${user_id}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to delete cart');
+  }
+};

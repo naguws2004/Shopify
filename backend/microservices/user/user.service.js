@@ -4,7 +4,6 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
 const db = require('./db');
-const { createUser, updateUser, updateUserPassword, getUserById } = require('./common');
 
 // Middleware to validate JWT token
 const validateToken = (req, res, next) => { 
@@ -51,22 +50,122 @@ router.get('/login', async (req, res) => {
 
 // Register a new user
 router.post('/register', async (req, res) => {
-  await createUser(req, res);
+  const { name, email, password } = req.body;
+  const saltRounds = 10;
+  try {
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const query = 'INSERT INTO users (name, email, hashed_password) VALUES (?, ?, ?)';
+    const params = [name, email, hashedPassword];
+    await db.query(query, params);
+    res.status(201).send('User registered successfully');
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 // Get user by id
 router.get('/:id', validateToken, async (req, res) => {
-  await getUserById(req, res);
+  try {
+    const query = 'SELECT id, name, email FROM users WHERE id = ?';
+    const params = [req.params.id];
+    const [rows] = await db.query(query, params);
+    if (rows.length > 0) {
+      res.status(200).json(rows[0]);
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 // Update a user
 router.put('/:id', validateToken, async (req, res) => {
-  await updateUser(req, res);
+  const { name } = req.body;
+  const { id } = req.params;
+  try {
+    const query = 'UPDATE users SET name = ? WHERE id = ?';
+    const params = [name, id];
+    const [result] = await db.query(query, params);
+    if (result.affectedRows > 0) {
+      res.json({ message: 'User updated' });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 // Update a user password
 router.put('/password/:id', validateToken, async (req, res) => {
-  await updateUserPassword(req, res);
+  const { name, password } = req.body;
+  const { id } = req.params;
+  const saltRounds = 10;
+  try {
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const query = 'UPDATE users SET name = ?, hashed_password = ? WHERE id = ?';
+    const params = [name, hashedPassword, id];
+    const [result] = await db.query(query, params);
+    if (result.affectedRows > 0) {
+      res.json({ message: 'User updated' });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get address 
+router.get('/address/:user_id', validateToken, async (req, res) => {
+  const { user_id } = req.params;
+  try {
+      const query = 'SELECT * FROM shipping_address WHERE user_id = ?';
+      const params = [user_id];
+      const [rows] = await db.query(query, params);
+      if (rows.length === 0) {
+        res.status(200).json([]);
+      } else {
+        res.status(200).json(rows);
+      }
+  } catch (err) {
+      res.status(500).json({ message: err.message });
+  }
+});
+
+// Add an address
+router.post('/address', validateToken, async (req, res) => {
+  const { user_id, address, city, state, pincode, contactno } = req.body;
+
+  try {
+    const query = 'INSERT INTO shipping_address (user_id, address, city, state, pincode, contactno) VALUES (?, ?, ?, ?, ?, ?)';
+    const params = [user_id, address, city, state, pincode, contactno];
+
+    const [result] = await db.query(query, params);
+    if (result.affectedRows > 0) {
+      res.status(201).json({ message: 'address added successfully' });
+    } else {
+      console.log(result);
+      res.status(500).json({ message: 'Failed to add address' });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Delete an Address
+router.delete('/address/:user_id', validateToken, async (req, res) => {
+  const { user_id } = req.params;
+  try {
+    const query = 'DELETE FROM shipping_address WHERE user_id = ?';
+    const params = [user_id];
+    const [result] = await db.query(query, params);
+    res.json({ message: 'Address deleted' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 module.exports = router;

@@ -1,0 +1,455 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Admin API",
+    "version": "1.0.0",
+    "description": "API for managing users and products in the admin panel"
+  },
+  "paths": {
+    "/api/admin/users": {
+      "get": {
+        "summary": "Get all users",
+        "tags": ["Users"],
+        "responses": {
+          "200": {
+            "description": "A list of users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "An error occurred while retrieving users"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new user",
+        "tags": ["Users"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewUser"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully"
+          },
+          "500": {
+            "description": "An error occurred while creating the user"
+          }
+        }
+      }
+    },
+    "/api/admin/users/{id}": {
+      "get": {
+        "summary": "Get user by id",
+        "tags": ["Users"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "The user id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The user details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "An error occurred while retrieving the user"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a user",
+        "tags": ["Users"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "The user id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUser"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "An error occurred while updating the user"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a user",
+        "tags": ["Users"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "The user id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "An error occurred while deleting the user"
+          }
+        }
+      }
+    },
+    "/api/admin/users/password/{id}": {
+      "put": {
+        "summary": "Update a user's password",
+        "tags": ["Users"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "The user id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserPassword"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User password updated"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "An error occurred while updating the user's password"
+          }
+        }
+      }
+    },
+    "/api/admin/products": {
+      "get": {
+        "summary": "Get all products",
+        "tags": ["Products"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Page number"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Number of items per page"
+          },
+          {
+            "in": "query",
+            "name": "filterText",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Text to filter products by name"
+          },
+          {
+            "in": "query",
+            "name": "includeQty",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Include only products with inventory greater than 0"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of products",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "products": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Product"
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pages": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "An error occurred while retrieving products"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new product",
+        "tags": ["Products"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewProduct"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Product created successfully"
+          },
+          "500": {
+            "description": "An error occurred while creating the product"
+          }
+        }
+      }
+    },
+    "/api/admin/products/{id}": {
+      "get": {
+        "summary": "Get product by id",
+        "tags": ["Products"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "The product id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The product details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found"
+          },
+          "500": {
+            "description": "An error occurred while retrieving the product"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a product",
+        "tags": ["Products"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "The product id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProduct"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Product updated"
+          },
+          "404": {
+            "description": "Product not found"
+          },
+          "500": {
+            "description": "An error occurred while updating the product"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a product",
+        "tags": ["Products"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "The product id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product deleted"
+          },
+          "404": {
+            "description": "Product not found"
+          },
+          "500": {
+            "description": "An error occurred while deleting the product"
+          }
+        }
+      }
+    },
+    "/api/admin/inventory/update": {
+      "put": {
+        "summary": "Update inventories for a set of product IDs",
+        "tags": ["Products"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "inventory": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Inventories updated for specified products"
+          },
+          "500": {
+            "description": "An error occurred while updating inventories"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          }
+        }
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number"
+          },
+          "inventory": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}

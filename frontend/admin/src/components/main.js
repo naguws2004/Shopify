@@ -22,13 +22,16 @@ const Main = () => {
         <br />
         <div>Admin Menu</div>
         <div>
+          <button className='button-main' onClick={handleUsers}>Users</button>
+        </div>
+        <div>
           <button className='button-main' onClick={handleProducts}>Products</button>
         </div>
         <div>
           <button className='button-main' onClick={handleInventory}>Inventory</button>
         </div>
         <div>
-          <button className='button-main' onClick={handleUsers}>Users</button>
+          <button className='button-main' onClick={handleUsers}>Orders</button>
         </div>
       </header>
     </div>

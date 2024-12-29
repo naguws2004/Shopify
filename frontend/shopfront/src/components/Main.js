@@ -1,37 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { getProducts } from '../services/productService';
 
-function Main({ cart, setCart, products, setProducts, name, setError, handleSettings, handleLogout, handleAddToCart, handleShowDetails, handleSaveProceed, handleResetCart }) {
-  const [filterText, setFilterText] = useState('');
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-
-  const fetchProducts = async () => {
-    try {
-      const fetchedProducts = await getProducts(page, filterText.trim());
-      setProducts(fetchedProducts.products);
-      setTotalPages(fetchedProducts.pages);
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  useEffect(() => {
-    fetchProducts();
-  }, [page]);
-
-  useEffect(() => {
-    fetchProducts();
-  }, [filterText]);
-
-  const handleFilterTextChange = (e) => {
-    setFilterText(e.target.value);
-  };
-  
-  const handlePageChange = (newPage) => {
-    setPage(newPage);
-  };
-
+function Main({ filterText, products, cart, name, page, totalPages, handleFilterTextChange, handlePageChange, handleSettings, handleLogout, handleAddToCart, handleShowDetails, handleSaveProceed, handleResetCart, handlePreviousOrders }) {
   return (
     <div className="main">
       <br/>
@@ -42,6 +11,7 @@ function Main({ cart, setCart, products, setProducts, name, setError, handleSett
       </div>
       <h2>Shopping Cart</h2>
       <div className='main-form-header'>
+        <button onClick={() => handlePreviousOrders()}>Previous Orders</button>&nbsp;
         <button onClick={() => handleResetCart()} disabled={cart.length === 0}>Reset Cart</button>&nbsp;
         <button onClick={() => handleSaveProceed()} disabled={cart.length === 0}>Save & Proceed</button>&nbsp;
       </div><br />

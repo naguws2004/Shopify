@@ -34,6 +34,10 @@ module.exports = async (app) => {
                     {
                         url: 'http://localhost:5004/api-docs.json', 
                         name: 'Cart API'
+                    },
+                    {
+                        url: 'http://localhost:5005/api-docs.json', 
+                        name: 'Orders API'
                     }
                 ]
             }

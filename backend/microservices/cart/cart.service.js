@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
 const db = require('./db');
 
 // Middleware to validate JWT token
@@ -25,7 +26,7 @@ router.get('/:user_id', validateToken, async (req, res) => {
     const { user_id } = req.params;
 
     try {
-        const query = 'SELECT * FROM cart WHERE user_id = ?';
+        const query = 'SELECT * FROM cart c INNER JOIN products p ON c.product_id = p.id WHERE user_id = ?';
         const params = [user_id];
 
         const [rows] = await db.query(query, params);

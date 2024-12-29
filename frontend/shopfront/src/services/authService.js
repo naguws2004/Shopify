@@ -37,6 +37,49 @@ export const getUserById = async (token, id) => {
   }
 };
 
+export const getAddressById = async (token, id) => {
+  try {
+    const response = await axios.get(`${API_URL_USERS}/address/${id}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to get address');
+  }
+};
+
+export const addAddressById = async (token, user_id, address, city, state, pincode, contactno) => {
+  try {
+    const response = await axios.post(`${API_URL_USERS}/address`, {
+      user_id, address, city, state, pincode, contactno
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    }});
+    return response.data;
+  } catch (error) {
+    throw new Error('Add address failed');
+  }
+};
+
+export const deleteAddressById = async (token, id) => {
+  try {
+    const response = await axios.delete(`${API_URL_USERS}/address/${id}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to delete address');
+  }
+};
+
 export const updateUser = async (token, id, user) => {
   try {
     const response = await axios.put(`${API_URL_USERS}/${id}`, user, {

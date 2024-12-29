@@ -1,14 +1,6 @@
 import React, { useState } from 'react';
 
-function Login({ email, setEmail, password, setPassword, handleSubmit }) {
-  const [showCookieWarning, setShowCookieWarning] = useState(true);
-
-  const handleAcceptCookies = () => {
-    setShowCookieWarning(false);
-    // You can also set a cookie to remember the user's choice
-    document.cookie = "cookiesAccepted=true; path=/; max-age=31536000"; // 1 year
-  };
-
+function Login({ email, setEmail, password, setPassword, showCookieWarning, handleAcceptCookies, handleSubmit }) {
   return (
     <div className="main-form-body">
       {showCookieWarning && (

@@ -1,0 +1,227 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Order API",
+    "version": "1.0.0",
+    "description": "A simple Express Order API"
+  },
+  "paths": {
+    "/api/orders": {
+      "post": {
+        "summary": "Add an order",
+        "tags": ["Order"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Order"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Order added successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to add order"
+          }
+        }
+      }
+    },
+    "/api/orders/detail": {
+      "post": {
+        "summary": "Add an order detail",
+        "tags": ["Order"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderDetail"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Order detail added successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to add order detail"
+          }
+        }
+      }
+    },
+    "/api/orders/{order_id}": {
+      "get": {
+        "summary": "Get order",
+        "tags": ["Order"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "order_id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "The ID of the order"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "An error occurred while retrieving the order"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove an order",
+        "tags": ["Order"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "order_id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "The ID of the order"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order removed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Order not found"
+          },
+          "500": {
+            "description": "An error occurred while removing the order"
+          }
+        }
+      }
+    },
+    "/api/orders/details/{order_id}": {
+      "get": {
+        "summary": "Get order details",
+        "tags": ["Order"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "order_id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "The ID of the order"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "An error occurred while retrieving the order details"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Order": {
+        "type": "object",
+        "required": ["order_date", "user_id"],
+        "properties": {
+          "order_id": {
+            "type": "integer",
+            "description": "The ID of the order"
+          },
+          "order_date": {
+            "type": "string",
+            "format": "date",
+            "description": "The date of the order"
+          },
+          "user_id": {
+            "type": "integer",
+            "description": "The ID of the user"
+          }
+        },
+        "example": {
+          "order_id": 1,
+          "order_date": "2023-10-01",
+          "user_id": 1
+        }
+      },
+      "OrderDetail": {
+        "type": "object",
+        "required": ["order_id", "product_id"],
+        "properties": {
+          "order_id": {
+            "type": "integer",
+            "description": "The ID of the order"
+          },
+          "product_id": {
+            "type": "integer",
+            "description": "The ID of the product"
+          }
+        },
+        "example": {
+          "order_id": 1,
+          "product_id": 1
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ]
+}

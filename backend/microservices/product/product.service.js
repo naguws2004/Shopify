@@ -1,15 +1,29 @@
 // product.service.js
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
 const db = require('./db');
 
-// Helper function to parse boolean values from query parameters
-const parseBool = (value) => {
-  return value === 'true';
-};
+// Middleware to validate JWT token
+const validateToken = (req, res, next) => { 
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  console.log('Token:', token);
+  if (!token) {
+      return res.sendStatus(401); // Unauthorized
+  }
+
+  jwt.verify(token, 'your_jwt_secret', (err, user) => {
+      if (err) {
+        return res.sendStatus(403); // Forbidden
+      }
+      req.user = user;
+      next();
+  });
+}
 
 // Get all products
-router.get('/', async (req, res) => {
+router.get('/', validateToken, async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const filterText = req.query.filterText || '';
@@ -51,7 +65,7 @@ router.get('/', async (req, res) => {
 });
 
 // Get product by id
-router.get('/:id', async (req, res) => {
+router.get('/:id', validateToken, async (req, res) => {
   try {
     const [rows] = await db.query('SELECT * FROM products WHERE id = ?', [req.params.id]);
     if (rows.length > 0) {
@@ -65,7 +79,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create a new product
-router.post('/', async (req, res) => {
+router.post('/', validateToken, async (req, res) => {
   const newProduct = {
     ...req.body,
   };
@@ -79,7 +93,7 @@ router.post('/', async (req, res) => {
 });
 
 // Update a product
-router.put('/:id', async (req, res) => {
+router.put('/:id', validateToken, async (req, res) => {
   try {
     const [result] = await db.query('UPDATE products SET ? WHERE id = ?', [req.body, req.params.id]);
     if (result.affectedRows > 0) {
@@ -93,7 +107,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete a product
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', validateToken, async (req, res) => {
   try {
     const [result] = await db.query('DELETE FROM products WHERE id = ?', [req.params.id]);
     if (result.affectedRows > 0) {

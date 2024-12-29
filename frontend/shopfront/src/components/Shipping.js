@@ -1,17 +1,18 @@
 import React from 'react';
 
-function Product({ userName, name, description, company, category, major_conditions, minor_conditions, price, handleBack, handleSettings, handleLogout }) {
+function Shipping({ name, address, setAddress, city, setCity, state, setState, pincode, setPincode, contactno, setContactno, handleSettings, handleLogout, handleCreateOrder, handleBackToCart }) {
   return (
     <div className="main">
       <br/>
       <div className='main-form-header'>
-        <span>Hello {userName}!</span>&nbsp;
+        <span>Hello {name}!</span>&nbsp;
         <button type="settings" onClick={handleSettings}>Settings</button>&nbsp;
         <button type="logout" onClick={handleLogout}>Logout</button>
       </div>
-      <h2>Product</h2>
+      <h2>Shipping Address</h2>
       <div className='main-form-header'>
-        <button type="back" onClick={handleBack}>Back</button>
+        <button onClick={() => handleBackToCart()}>Back to Cart</button>&nbsp;
+        <button onClick={() => handleCreateOrder()}>Create Order</button>&nbsp;
       </div><br />
       <div className="main-form-body">
         <table>
@@ -29,73 +30,66 @@ function Product({ userName, name, description, company, category, major_conditi
           </tr>
           <tr>
             <td>
-              <label>Description:</label>
+              <label>Address:</label>
             </td>
             <td>
               <input
-                type="description"
-                value={description}
-                readOnly
+                type="address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                required
               />
             </td>
           </tr>
           <tr>
             <td>
-              <label>Company:</label>
+              <label>City:</label>
             </td>
             <td>
               <input
-                type="company"
-                value={company}
-                readOnly
+                type="city"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                required
               />
             </td>
           </tr>
           <tr>
             <td>
-              <label>Category:</label>
+              <label>State:</label>
             </td>
             <td>
               <input
-                type="category"
-                value={category}
-                readOnly
+                type="state"
+                value={state}
+                onChange={(e) => setState(e.target.value)}
+                required
               />
             </td>
           </tr>
           <tr>
             <td>
-              <label>Major Conditions:</label>
+              <label>Pin Code:</label>
             </td>
             <td>
               <input
-                type="major_conditions"
-                value={major_conditions}
-                readOnly
+                type="pincode"
+                value={pincode}
+                onChange={(e) => setPincode(e.target.value)}
+                required
               />
             </td>
           </tr>
           <tr>
             <td>
-              <label>Minor Conditions:</label>
+              <label>Contact Number:</label>
             </td>
             <td>
               <input
-                type="minor_conditions"
-                value={minor_conditions}
-                readOnly
-              />
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <label>Price:</label>
-            </td>
-            <td>
-              <input
-                type="price"
-                value={price}
-                readOnly
+                type="contactno"
+                value={contactno}
+                onChange={(e) => setContactno(e.target.value)}
+                required
               />
             </td>
           </tr>
@@ -105,4 +99,4 @@ function Product({ userName, name, description, company, category, major_conditi
   );
 }
 
-export default Product;
+export default Shipping;

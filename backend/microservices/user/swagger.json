@@ -168,186 +168,101 @@
         }
       }
     },
-    "/api/adminUsers": {
+    "/api/users/address/{user_id}": {
       "get": {
-        "summary": "Get all admin users",
-        "tags": ["AdminUsers"],
+        "summary": "Get address by user id",
+        "tags": ["Address"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "The user id"
+          }
+        ],
         "responses": {
           "200": {
-            "description": "A list of admin users",
+            "description": "The address of the user",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/User"
-                  }
+                  "$ref": "#/components/schemas/Address"
                 }
               }
             }
+          },
+          "404": {
+            "description": "Address not found"
+          },
+          "500": {
+            "description": "An error occurred while retrieving the address"
           }
         }
       },
+      "delete": {
+        "summary": "Delete an address by user id",
+        "tags": ["Address"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "The user id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Address deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Address"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Address not found"
+          },
+          "500": {
+            "description": "An error occurred while deleting the address"
+          }
+        }
+      }
+    },
+    "/api/users/address": {
       "post": {
-        "summary": "Create a new admin user",
-        "tags": ["AdminUsers"],
+        "summary": "Add an address",
+        "tags": ["Address"],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/User"
+                "$ref": "#/components/schemas/Address"
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "The admin user was successfully created",
+            "description": "Address added successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/User"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/adminUsers/{id}": {
-      "get": {
-        "summary": "Get admin user by id",
-        "tags": ["AdminUsers"],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "schema": {
-              "type": "integer"
-            },
-            "required": true,
-            "description": "The admin user id"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The admin user description by id",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
+                  "$ref": "#/components/schemas/Address"
                 }
               }
             }
           },
-          "404": {
-            "description": "The admin user was not found"
-          }
-        }
-      },
-      "put": {
-        "summary": "Update the admin user by the id",
-        "tags": ["AdminUsers"],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "schema": {
-              "type": "integer"
-            },
-            "required": true,
-            "description": "The admin user id"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/User"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "The admin user was updated",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "The admin user was not found"
-          }
-        }
-      },
-      "delete": {
-        "summary": "Remove the admin user by id",
-        "tags": ["AdminUsers"],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "schema": {
-              "type": "integer"
-            },
-            "required": true,
-            "description": "The admin user id"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The admin user was deleted"
-          },
-          "404": {
-            "description": "The admin user was not found"
-          }
-        }
-      }
-    },
-    "/api/adminUsers/password/{id}": {
-      "put": {
-        "summary": "Update the admin user by the id",
-        "tags": ["AdminUsers"],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "schema": {
-              "type": "integer"
-            },
-            "required": true,
-            "description": "The admin user id"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/User"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "The admin user was updated",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "The admin user was not found"
+          "500": {
+            "description": "An error occurred while adding the address"
           }
         }
       }
@@ -388,6 +303,44 @@
           "name": "John Doe",
           "email": "john.doe@example.com",
           "password": "Qwerty123"
+        }
+      },
+      "Address": {
+        "type": "object",
+        "required": ["user_id", "address", "city", "state", "pincode", "contactno"],
+        "properties": {
+          "user_id": {
+            "type": "integer",
+            "description": "The ID of the user"
+          },
+          "address": {
+            "type": "string",
+            "description": "The address of the user"
+          },
+          "city": {
+            "type": "string",
+            "description": "The city of the user"
+          },
+          "state": {
+            "type": "string",
+            "description": "The state of the user"
+          },
+          "pincode": {
+            "type": "string",
+            "description": "The pincode of the user"
+          },
+          "contactno": {
+            "type": "string",
+            "description": "The contact number of the user"
+          }
+        },
+        "example": {
+          "user_id": "d5fE_asz",
+          "address": "123 Main St",
+          "city": "Anytown",
+          "state": "Anystate",
+          "pincode": "123456",
+          "contactno": "123-456-7890"
         }
       }
     }

@@ -9,6 +9,7 @@ function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [showCookieWarning, setShowCookieWarning] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,13 +25,19 @@ function LoginPage() {
       alert('Logged in successfully');
       const cart = await getCartByUserId(userInfo.token, userInfo.id);
       if (cart.length > 0) {
-        alert('Cart has been restored');
+        navigate('/cart');
         return;
       }
       navigate('/main');
     } catch (err) {
       setError(err.message);
     }
+  };
+
+  const handleAcceptCookies = () => {
+    setShowCookieWarning(false);
+    // You can also set a cookie to remember the user's choice
+    document.cookie = "cookiesAccepted=true; path=/; max-age=31536000"; // 1 year
   };
 
   return (
@@ -42,6 +49,8 @@ function LoginPage() {
           setEmail={setEmail} 
           password={password} 
           setPassword={setPassword} 
+          showCookieWarning={showCookieWarning}
+          handleAcceptCookies={handleAcceptCookies}
           handleSubmit={handleSubmit} 
         />
         <Link to="/register">

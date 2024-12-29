@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { getProducts, updateProductInventory } from '../services/inventoryService';
+import { getProducts } from '../services/productService';
+import { updateProductInventory } from '../services/inventoryService';
 
 const Inventory = () => {
   const [error, setError] = useState('');

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import MainComponent from '../components/Main';
 import { saveCart } from '../services/cartService';
+import { getProducts } from '../services/productService';
 
 function MainPage() {
   const [error, setError] = useState('');
@@ -11,9 +12,32 @@ function MainPage() {
   const [id, setId] = useState(0);
   const [name, setName] = useState('');
   const [token, setToken] = useState('');
+  const [totalPages, setTotalPages] = useState(1);
+  const [filterText, setFilterText] = useState('');
+  const [page, setPage] = useState(1);
   const navigate = useNavigate();
   const timeoutRef = useRef(null);
-  
+
+  const fetchProducts = async () => {
+    if (name) { 
+      try {
+        const fetchedProducts = await getProducts(token, page, filterText.trim());
+        setProducts(fetchedProducts.products);
+        setTotalPages(fetchedProducts.pages);
+      } catch (err) {
+        setError(err.message);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, [page]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [filterText]);
+
   useEffect(() => {
     const userInfo = Cookies.get('userInfo');
     if (!userInfo) {
@@ -25,6 +49,7 @@ function MainPage() {
     setId(user.id);
     setName(user.name);
     setToken(user.token);
+    fetchProducts();
   }, [name]);
 
   // useEffect(() => {
@@ -50,6 +75,14 @@ function MainPage() {
   //     window.removeEventListener('keydown', handleActivity);
   //   };
   // }, []);
+
+  const handleFilterTextChange = (e) => {
+    setFilterText(e.target.value);
+  };
+  
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+  };
 
   const handleLogout = () => {
     handleReset();
@@ -84,6 +117,11 @@ function MainPage() {
       setError(err.message);
     }
     alert('Cart saved successfully');
+    navigate('/cart');
+  };
+  
+  const handlePreviousOrders = () => {
+    alert('Previous orders');
   };
 
   const handleReset = () => {
@@ -96,17 +134,21 @@ function MainPage() {
       {error && <div className='error'>{error}</div>}
       <div>
         <MainComponent 
-          cart={cart}
-          setCart={setCart}
+          filterText={filterText}
           products={products}
-          setProducts={setProducts}
-          name={name} 
+          cart={cart}
+          name={name}
+          page={page}
+          totalPages={totalPages}
+          handleFilterTextChange={handleFilterTextChange}
+          handlePageChange={handlePageChange}
           handleSettings={handleSettings} 
           handleLogout={handleLogout} 
           handleAddToCart={handleAddToCart}
           handleShowDetails={handleShowDetails}
           handleSaveProceed={handleSaveProceed}
           handleResetCart={handleResetCart}
+          handlePreviousOrders={handlePreviousOrders}
         />
       </div>
     </div>

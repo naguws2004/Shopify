@@ -4,6 +4,9 @@ import RegisterPage from './pages/RegisterPage';
 import MainPage from './pages/MainPage';
 import SettingPage from './pages/SettingPage';
 import ProductPage from './pages/ProductPage';
+import CartPage from './pages/CartPage';
+import ShippingPage from './pages/ShippingPage';
+import OrderPage from './pages/OrderPage';
 import './styles/App.css';
 
 function App() {
@@ -18,6 +21,9 @@ function App() {
             <Route path="/main" element={<MainPage />} />
             <Route path="/settings" element={<SettingPage />} />
             <Route path="/product/:id" element={<ProductPage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/shipping" element={<ShippingPage />} />
+            <Route path="/order/:order_id" element={<OrderPage />} />
           </Routes>
         </header>
       </div>
