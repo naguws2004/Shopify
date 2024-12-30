@@ -7,6 +7,7 @@ import ProductPage from './pages/ProductPage';
 import CartPage from './pages/CartPage';
 import ShippingPage from './pages/ShippingPage';
 import OrderPage from './pages/OrderPage';
+import OrdersPage from './pages/OrdersPage';
 import './styles/App.css';
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
             <Route path="/cart" element={<CartPage />} />
             <Route path="/shipping" element={<ShippingPage />} />
             <Route path="/order/:order_id" element={<OrderPage />} />
+            <Route path="/orders" element={<OrdersPage />} />
           </Routes>
         </header>
       </div>

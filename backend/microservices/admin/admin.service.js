@@ -2,7 +2,9 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
+const { format, parseISO } = require('date-fns');
 const db = require('./db');
+const mysql = require('mysql2');
 
 // Get all users
 router.get('/users/', async (req, res) => {
@@ -215,29 +217,20 @@ router.put('/inventory/update', async (req, res) => {
 router.get('/orders', async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
-  const filterText = req.query.filterText || '';
   const filterOrderId = req.query.filterOrderId || '';
+  const filterText = req.query.filterText ? `%${req.query.filterText.toLowerCase()}%` : '%';
+  const filterStatus = req.query.filterStatus ? `%${req.query.filterStatus.toLowerCase()}%` : '%';
   const offset = (page - 1) * limit;
 
   try {
     let rows;
     let countResult;
     if (filterOrderId) {
-      if (filterText) {
-        [rows] = await db.query('SELECT o.id, order_date, name, email, payment_date, dispatch_date, cancelled_date, status FROM orders o INNER JOIN users u ON o.user_id = u.id WHERE o.id = ? AND LOWER(name) LIKE ? ORDER BY order_date DESC, o.id LIMIT ? OFFSET ?', [filterOrderId, `%${filterText.toLowerCase()}%`, limit, offset]);
-        [countResult] = await db.query('SELECT COUNT(*) as count FROM orders o INNER JOIN users u ON o.user_id = u.id WHERE o.id = ? AND LOWER(name) LIKE ? ', [filterOrderId, `%${filterText.toLowerCase()}%`]);
-      } else {
-        [rows] = await db.query('SELECT o.id, order_date, name, email, payment_date, dispatch_date, cancelled_date, status FROM orders o INNER JOIN users u ON o.user_id = u.id WHERE o.id = ? ORDER BY order_date DESC, o.id LIMIT ? OFFSET ?', [filterOrderId, limit, offset]);
-        [countResult] = await db.query('SELECT COUNT(*) as count FROM orders WHERE id = ?', [filterOrderId]);
-      }
+      [rows] = await db.query('SELECT o.id, order_date, name, email, payment_date, dispatch_date, cancelled_date, status FROM orders o INNER JOIN users u ON o.user_id = u.id WHERE o.id = ? AND LOWER(name) LIKE ? AND UPPER(status) LIKE ? ORDER BY order_date DESC, o.id LIMIT ? OFFSET ?', [filterOrderId, filterText, filterStatus, limit, offset]);
+      [countResult] = await db.query('SELECT COUNT(*) as count FROM orders o INNER JOIN users u ON o.user_id = u.id WHERE o.id = ? AND LOWER(name) LIKE ? AND UPPER(status) LIKE ?', [filterOrderId, filterText, filterStatus]);
     } else {
-      if (filterText) {
-        [rows] = await db.query('SELECT o.id, order_date, name, email, payment_date, dispatch_date, cancelled_date, status FROM orders o INNER JOIN users u ON o.user_id = u.id WHERE LOWER(name) LIKE ? ORDER BY order_date DESC, o.id LIMIT ? OFFSET ?', [`%${filterText.toLowerCase()}%`, limit, offset]);
-        [countResult] = await db.query('SELECT COUNT(*) as count FROM orders o INNER JOIN users u ON o.user_id = u.id WHERE LOWER(name) LIKE ? ', [`%${filterText.toLowerCase()}%`]);
-      } else {
-        [rows] = await db.query('SELECT o.id, order_date, name, email, payment_date, dispatch_date, cancelled_date, status FROM orders o INNER JOIN users u ON o.user_id = u.id ORDER BY order_date DESC, o.id LIMIT ? OFFSET ?', [limit, offset]);
-        [countResult] = await db.query('SELECT COUNT(*) as count FROM orders');
-      }
+      [rows] = await db.query('SELECT o.id, order_date, name, email, payment_date, dispatch_date, cancelled_date, status FROM orders o INNER JOIN users u ON o.user_id = u.id WHERE LOWER(name) LIKE ? AND UPPER(status) LIKE ? ORDER BY order_date DESC, o.id LIMIT ? OFFSET ?', [filterText, filterStatus, limit, offset]);
+      [countResult] = await db.query('SELECT COUNT(*) as count FROM orders o INNER JOIN users u ON o.user_id = u.id WHERE LOWER(name) LIKE ? AND UPPER(status) LIKE ?', [filterText, filterStatus]);
     }
     const totalItems = countResult[0].count;
     const totalPages = Math.ceil(totalItems / limit);
@@ -284,13 +277,63 @@ router.get('/orders/details/:order_id', async (req, res) => {
 });
 
 // Update an order 
-router.put('/cancel/:order_id', async (req, res) => {
-    const { order_id } = req.params;
+router.put('/orders/pay/:id', async (req, res) => {
+  const { id } = req.params;
+  const { payment_date } = req.body;
 
   try {
-    const params = [order_id];
+    const parsedDate = parseISO(payment_date);
+    const formattedDate = format(parsedDate, 'yyyy-MM-dd HH:mm:ss');
+    const params = [formattedDate, id];
 
-    const query = 'UPDATE orders SET cancelled_date = CURDATE(), status = \'CANCELLED\' WHERE id = ?';
+    const query = 'UPDATE orders SET payment_date = ?, status = \'PAID\' WHERE id = ?';
+    const [result] = await db.query(query, params);
+
+    if (result.affectedRows > 0) {
+        res.status(200).json({ message: 'order updated successfully' });
+    } else {
+      res.status(404).json({ message: 'order not found' });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Update an order 
+router.put('/orders/dispatch/:id', async (req, res) => {
+  const { id } = req.params;
+  const { dispatch_date } = req.body;
+
+  try {
+    const parsedDate = parseISO(dispatch_date);
+    const formattedDate = format(parsedDate, 'yyyy-MM-dd HH:mm:ss');
+    const params = [formattedDate, id];
+
+    const query = 'UPDATE orders SET dispatch_date = ?, status = \'DISPATCHED\' WHERE id = ?';
+    const [result] = await db.query(query, params);
+
+    if (result.affectedRows > 0) {
+        res.status(200).json({ message: 'order updated successfully' });
+    } else {
+      res.status(404).json({ message: 'order not found' });
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Update an order 
+router.put('/orders/cancel/:id', async (req, res) => {
+  const { id } = req.params;
+  const { cancelled_date } = req.body;
+
+  try {
+    const parsedDate = parseISO(cancelled_date);
+    const formattedDate = format(parsedDate, 'yyyy-MM-dd HH:mm:ss');
+    const params = [formattedDate, id];
+
+    const query = 'UPDATE orders SET cancelled_date = ?, status = \'CANCELLED\' WHERE id = ?';
     const [result] = await db.query(query, params);
 
     if (result.affectedRows > 0) {

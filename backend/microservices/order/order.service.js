@@ -21,6 +21,40 @@ const validateToken = (req, res, next) => {
   });
 }
 
+// Get all orders
+router.get('/', validateToken, async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const id = parseInt(req.query.id) || 0;
+  const limit = parseInt(req.query.limit) || 10;
+  const filterOrderId = req.query.filterOrderId || '';
+  const filterText = req.query.filterText ? `%${req.query.filterText.toLowerCase()}%` : '%';
+  const filterStatus = req.query.filterStatus ? `%${req.query.filterStatus.toLowerCase()}%` : '%';
+  const offset = (page - 1) * limit;
+
+  try {
+    let rows;
+    let countResult;
+    if (filterOrderId) {
+      [rows] = await db.query('SELECT o.id, order_date, name, email, payment_date, dispatch_date, cancelled_date, status FROM orders o INNER JOIN users u ON o.user_id = u.id WHERE u.id = ? AND o.id = ? AND LOWER(name) LIKE ? AND UPPER(status) LIKE ? ORDER BY order_date DESC, o.id LIMIT ? OFFSET ?', [id, filterOrderId, filterText, filterStatus, limit, offset]);
+      [countResult] = await db.query('SELECT COUNT(*) as count FROM orders o INNER JOIN users u ON o.user_id = u.id WHERE u.id = ? AND o.id = ? AND LOWER(name) LIKE ? AND UPPER(status) LIKE ?', [id, filterOrderId, filterText, filterStatus]);
+    } else {
+      [rows] = await db.query('SELECT o.id, order_date, name, email, payment_date, dispatch_date, cancelled_date, status FROM orders o INNER JOIN users u ON o.user_id = u.id WHERE u.id = ? AND LOWER(name) LIKE ? AND UPPER(status) LIKE ? ORDER BY order_date DESC, o.id LIMIT ? OFFSET ?', [id, filterText, filterStatus, limit, offset]);
+      [countResult] = await db.query('SELECT COUNT(*) as count FROM orders o INNER JOIN users u ON o.user_id = u.id WHERE u.id = ? AND LOWER(name) LIKE ? AND UPPER(status) LIKE ?', [id, filterText, filterStatus]);
+    }
+    const totalItems = countResult[0].count;
+    const totalPages = Math.ceil(totalItems / limit);
+
+    res.json({
+      orders: rows,
+      total: totalItems,
+      page: page,
+      pages: totalPages
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // Get order
 router.get('/:order_id', validateToken, async (req, res) => {
     const { order_id } = req.params;
@@ -111,13 +145,13 @@ router.post('/address', validateToken, async (req, res) => {
 });
 
 // Update an order 
-router.put('/cancel/:order_id', validateToken, async (req, res) => {
+router.put('/pay/:order_id', validateToken, async (req, res) => {
     const { order_id } = req.params;
 
   try {
     const params = [order_id];
 
-    const query = 'UPDATE orders SET cancelled_date = CURDATE(), status = \'CANCELLED\' WHERE id = ?';
+    const query = 'UPDATE orders SET payment_date = CURDATE(), status = \'PAID\' WHERE id = ?';
     const [result] = await db.query(query, params);
 
     if (result.affectedRows > 0) {
@@ -128,6 +162,26 @@ router.put('/cancel/:order_id', validateToken, async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
+});
+
+// Update an order 
+router.put('/cancel/:order_id', validateToken, async (req, res) => {
+  const { order_id } = req.params;
+
+try {
+  const params = [order_id];
+
+  const query = 'UPDATE orders SET cancelled_date = CURDATE(), status = \'CANCELLED\' WHERE id = ?';
+  const [result] = await db.query(query, params);
+
+  if (result.affectedRows > 0) {
+      res.status(200).json({ message: 'order updated successfully' });
+  } else {
+    res.status(404).json({ message: 'order not found' });
+  }
+} catch (err) {
+  res.status(500).json({ message: err.message });
+}
 });
 
 module.exports = router;

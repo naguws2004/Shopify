@@ -87,6 +87,46 @@ button:disabled {
   align-items: center;
 }
 
+.order {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  grid-template-rows: auto 1fr;
+  gap: 6px;
+}
+
+.order-list {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  height: 659px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
+  overflow-y: auto;
+}
+
+.order-form {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.order-form-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center; 
+}
+
+.order-form-body {
+  display: flex;
+  justify-content: center;
+  align-items: center; 
+}
+
+.order-form-table {
+  width: 400px;
+}
+
 .clickable {
   cursor: 'pointer';
   text-decoration: 'underline';

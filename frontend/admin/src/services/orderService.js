@@ -1,8 +1,7 @@
 import axios from 'axios';
 import { API_URL } from '../common/constants';
 
-
-export const getOrders = async (page, filterText, filterOrderId) => {
+export const getOrders = async (page, filterText, filterOrderId, filterStatus) => {
   const limit = 10;
   try {
     const response = await axios.get(`${API_URL}/orders/`, {
@@ -14,6 +13,7 @@ export const getOrders = async (page, filterText, filterOrderId) => {
         limit,
         filterText: filterText.trim(),
         filterOrderId: filterOrderId.trim(),
+        filterStatus: filterStatus.trim()
       }
     });
     const { orders, total, pages } = response.data;
@@ -29,28 +29,45 @@ export const getOrders = async (page, filterText, filterOrderId) => {
   }
 };
 
-export const updateOrder = async (id, product) => {
+export const payOrder = async (id, payment_date) => {
   try {
-    const response = await axios.put(`${API_URL}/orders/${id}`, product, {
+    const response = await axios.put(`${API_URL}/orders/pay/${id}`, { payment_date }, {
       headers: {
         'Content-Type': 'application/json'
       },
     });
     return response.data;
   } catch (error) {
-    throw new Error('Failed to update product');
+    alert(error);
+    throw new Error('Failed to update order');
   }
 };
 
-export const cancelOrder = async (id) => {
+export const dispatchOrder = async (id, dispatch_date) => {
   try {
-    const response = await axios.delete(`${API_URL}/orders/${id}`, {
+    const response = await axios.put(`${API_URL}/orders/dispatch/${id}`, { dispatch_date }, {
       headers: {
         'Content-Type': 'application/json'
       },
     });
     return response.data;
   } catch (error) {
-    throw new Error('Failed to delete product');
+    alert(error);
+    throw new Error('Failed to update order');
+  }
+};
+
+export const cancelOrder = async (id, cancelled_date) => {
+  try {
+    const response = await axios.put(`${API_URL}/orders/cancel/${id}`, { cancelled_date }, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    });
+    //*** update inventory */
+    return response.data;
+  } catch (error) {
+    alert(error);
+    throw new Error('Failed to update order');
   }
 };

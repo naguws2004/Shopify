@@ -1,6 +1,6 @@
 import React from 'react';
 
-function Order({ products, name, totalPrice, handleSettings, handleLogout, handleShowDetails, handleMakePayment, handleCancelOrder }) {
+function Order({ order, products, name, totalPrice, handleSettings, handleLogout, handleShowDetails, handleMakePayment, handleCancelOrder }) {
   return (
     <div className="main">
       <br/>
@@ -16,9 +16,34 @@ function Order({ products, name, totalPrice, handleSettings, handleLogout, handl
       </div><br />
       <div className='main-form-body'>
         <div>
-          <label>Total Price:</label>
-          <input type='text' value={totalPrice} readOnly />
-        </div><br />
+          <table>
+            <tr>
+              <td>
+                <label>Order Id:</label>
+              </td>
+              <td>
+                <input type='text' value={order.id} readOnly />
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label>Order Date:</label>
+              </td>
+              <td>
+                <input type='text' value={order.order_date} readOnly />
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label>Total Price:</label>
+              </td>
+              <td>
+                <input type='text' value={totalPrice} readOnly />
+              </td>
+            </tr>
+          </table>
+        </div>
+        <br />
         {Array.isArray(products) && products.length > 0 ? (
           products.map((element, index) => (
             <div key={element.id}>

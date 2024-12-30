@@ -2,12 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import OrderComponent from '../components/Order';
-import { getProductsByOrderId, cancelOrder } from '../services/orderService';
+import { getOrderByOrderId, getOrderDetailsByOrderId, cancelOrder, payOrder } from '../services/orderService';
 import { increaseProductInventory } from '../services/inventoryService';
 
 function OrderPage() {
   const { order_id } = useParams();
   const [error, setError] = useState('');
+  const [order, setOrder] = useState({});
   const [products, setProducts] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
   const [id, setId] = useState(0);
@@ -18,10 +19,14 @@ function OrderPage() {
   
   const fetchOrder = async () => {
     try {
-      const fetchProducts = await getProductsByOrderId(token, order_id);
-      setProducts(fetchProducts);
-      const sum = fetchProducts.reduce((acc, item) => acc + parseFloat(item.price), 0);
-      setTotalPrice(sum.toFixed(2));
+      const fetchOrder = await getOrderByOrderId(token, order_id);
+      if (fetchOrder.length > 0) {
+        setOrder(fetchOrder[0]);
+        const fetchProducts = await getOrderDetailsByOrderId(token, order_id);
+        setProducts(fetchProducts);
+        const sum = fetchProducts.reduce((acc, item) => acc + parseFloat(item.price), 0);
+        setTotalPrice(sum.toFixed(2));
+      }
     } catch (err) {
       setError(err.message);
     }
@@ -39,7 +44,7 @@ function OrderPage() {
       setId(user.id);
       setName(user.name);
       setToken(user.token);
-      if (order_id > 0) await fetchOrder();
+      if (id > 0) await fetchOrder();
     };
 
     checkUser();
@@ -95,9 +100,12 @@ function OrderPage() {
     }
   };
   
-  const handleMakePayment = () => {
+  const handleMakePayment = async () => {
     try {
+      await payOrder(token, order_id);
       alert('Payment successful');
+      handleReset();
+      navigate('/main');
     } catch (err) {
       setError(err.message);
     }
@@ -113,6 +121,7 @@ function OrderPage() {
       {error && <div className='error'>{error}</div>}
       <div>
         <OrderComponent 
+          order={order}
           products={products}
           name={name}
           totalPrice={totalPrice} 

@@ -49,6 +49,20 @@ export const addOrderAddressById = async (token, order_id, address, city, state,
   }
 };
 
+export const payOrder = async (token, order_id) => {
+  try {
+    const response = await axios.put(`${API_URL_ORDERS}/pay/${order_id}`, {},
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    }});
+    return response.data;
+  } catch (error) {
+    throw new Error('Order cancel failed');
+  }
+};
+
 export const cancelOrder = async (token, order_id) => {
   try {
     const response = await axios.put(`${API_URL_ORDERS}/cancel/${order_id}`, {},
@@ -63,7 +77,21 @@ export const cancelOrder = async (token, order_id) => {
   }
 };
 
-export const getProductsByOrderId = async (token, order_id) => {
+export const getOrderByOrderId = async (token, order_id) => {
+  try {
+    const response = await axios.get(`${API_URL_ORDERS}/${order_id}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to get order details');
+  }
+};
+
+export const getOrderDetailsByOrderId = async (token, order_id) => {
   try {
     const response = await axios.get(`${API_URL_ORDERS}/details/${order_id}`, {
       headers: {
@@ -74,5 +102,35 @@ export const getProductsByOrderId = async (token, order_id) => {
     return response.data;
   } catch (error) {
     throw new Error('Failed to get order details');
+  }
+};
+
+export const getOrders = async (token, page, id, filterText, filterOrderId, filterStatus) => {
+  const limit = 10;
+  try {
+    const response = await axios.get(`${API_URL_ORDERS}/`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      params: {
+        page,
+        id,
+        limit,
+        filterText: filterText.trim(),
+        filterOrderId: filterOrderId.trim(),
+        filterStatus: filterStatus.trim(),
+      }
+    });
+    const { orders, total, pages } = response.data;
+    return {
+      orders,
+      total,
+      page,
+      pages
+    };
+  } catch (error) {
+    alert(error);
+    throw new Error('Failed to fetch orders');
   }
 };

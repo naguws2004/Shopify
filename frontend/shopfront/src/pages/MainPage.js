@@ -121,7 +121,7 @@ function MainPage() {
   };
   
   const handlePreviousOrders = () => {
-    alert('Previous orders');
+    navigate('/orders');
   };
 
   const handleReset = () => {
