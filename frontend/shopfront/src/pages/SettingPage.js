@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import SettingComponent from '../components/Setting';
-import { updateUser, updateUserPassword } from '../services/authService';
+import { updateUser, updateUserPassword } from '../services/userService';
 
 function SettingPage() {
   const [error, setError] = useState('');

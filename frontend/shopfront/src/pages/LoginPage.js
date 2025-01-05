@@ -54,7 +54,7 @@ function LoginPage() {
           handleSubmit={handleSubmit} 
         />
         <Link to="/register">
-          <button>Go To Registration</button>
+          <button>Register</button>
         </Link>
       </div>
     </div>

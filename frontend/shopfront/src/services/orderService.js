@@ -30,6 +30,7 @@ export const createOrderDetail = async (token, order_id, product_id) => {
     }});
     return response.data;
   } catch (error) {
+    alert(error);
     throw new Error('Order detail creation failed');
   }
 };
@@ -77,6 +78,20 @@ export const cancelOrder = async (token, order_id) => {
   }
 };
 
+export const returnOrder = async (token, order_id) => {
+  try {
+    const response = await axios.put(`${API_URL_ORDERS}/return/${order_id}`, {},
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    }});
+    return response.data;
+  } catch (error) {
+    throw new Error('Order return failed');
+  }
+};
+
 export const getOrderByOrderId = async (token, order_id) => {
   try {
     const response = await axios.get(`${API_URL_ORDERS}/${order_id}`, {
@@ -105,7 +120,7 @@ export const getOrderDetailsByOrderId = async (token, order_id) => {
   }
 };
 
-export const getOrders = async (token, page, id, filterText, filterOrderId, filterStatus) => {
+export const getOrders = async (token, page, id, filterOrderId, filterStatus) => {
   const limit = 10;
   try {
     const response = await axios.get(`${API_URL_ORDERS}/`, {
@@ -117,7 +132,7 @@ export const getOrders = async (token, page, id, filterText, filterOrderId, filt
         page,
         id,
         limit,
-        filterText: filterText.trim(),
+        filterText: '',
         filterOrderId: filterOrderId.trim(),
         filterStatus: filterStatus.trim(),
       }
@@ -130,7 +145,6 @@ export const getOrders = async (token, page, id, filterText, filterOrderId, filt
       pages
     };
   } catch (error) {
-    alert(error);
     throw new Error('Failed to fetch orders');
   }
 };

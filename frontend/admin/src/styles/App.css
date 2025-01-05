@@ -29,6 +29,7 @@ input {
 }
 
 button {
+  width: 150px;
   margin: 4px;
   padding: 10px 20px;
   background-color: #2f4ad3;
@@ -49,16 +50,33 @@ button:disabled {
 
 .App-main {
   text-align: center;
-}
-
-.App-header-main {
   background-color: #282c34;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-size: calc(20px + 2vmin);
+}
+
+.App-header-main {
   color: white;
+  border-style: solid;
+  border-color: white;
+  border-width: 1px; 
+  padding: 10px; 
+  margin: 10px; 
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.App-header-sub {
+  border-style: solid;
+  border-color: white;
+  border-width: 1px; 
+  padding: 10px; 
+  margin: 10px; 
+  width: 200px;
 }
 
 .button-main {

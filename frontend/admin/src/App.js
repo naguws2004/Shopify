@@ -16,7 +16,7 @@ function App() {
             <Route path="/users" element={<Users />} />
             <Route path="/products" element={<Products />} />
             <Route path="/inventory" element={<Inventory />} />
-            <Route path="/orders" element={<Orders />} />
+            <Route path="/orders/:action" element={<Orders />} />
           </Routes>
         </header>
       </div>

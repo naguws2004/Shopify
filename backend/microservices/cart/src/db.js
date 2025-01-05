@@ -1,7 +1,7 @@
 const mysql = require('mysql2');
 
 const pool = mysql.createPool({
-  host: 'localhost', // Replace with your MySQL host
+  host: '172.31.128.1', // Replace with your MySQL host
   port: 3306, // Replace with your MySQL port
   user: 'nagesh', // Replace with your MySQL user
   password: 'Qwerty1234!', // Replace with your MySQL password
@@ -10,6 +10,7 @@ const pool = mysql.createPool({
 
 pool.getConnection((err, connection) => {
   if (err) {
+    console.log(err);
     console.error('Error connecting to the database:', err.message);
   } else {
     console.log(`Connected to the database ${connection.config.database}`);

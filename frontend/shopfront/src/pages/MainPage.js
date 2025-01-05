@@ -2,41 +2,35 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import MainComponent from '../components/Main';
-import { saveCart } from '../services/cartService';
-import { getProducts } from '../services/productService';
+import { getQueryById , addQueryById } from '../services/userService';
 
 function MainPage() {
   const [error, setError] = useState('');
-  const [cart, setCart] = useState([]);
-  const [products, setProducts] = useState([]);
+  const [company, setCompany] = useState('');
+  const [category, setCategory] = useState('');
+  const [major_conditions, setMajor_conditions] = useState('');
+  const [minor_conditions, setMinor_conditions] = useState('');
   const [id, setId] = useState(0);
   const [name, setName] = useState('');
   const [token, setToken] = useState('');
-  const [totalPages, setTotalPages] = useState(1);
-  const [filterText, setFilterText] = useState('');
-  const [page, setPage] = useState(1);
   const navigate = useNavigate();
   const timeoutRef = useRef(null);
 
-  const fetchProducts = async () => {
+  const fetchQuery = async () => {
     if (name) { 
       try {
-        const fetchedProducts = await getProducts(token, page, filterText.trim());
-        setProducts(fetchedProducts.products);
-        setTotalPages(fetchedProducts.pages);
+        const fetchedQuery = await getQueryById(token, id);
+        if (fetchedQuery.length > 0) {
+          setCompany(fetchedQuery[0].company);
+          setCategory(fetchedQuery[0].category);
+          setMajor_conditions(fetchedQuery[0].major_conditions);
+          setMinor_conditions(fetchedQuery[0].minor_conditions);
+        }
       } catch (err) {
         setError(err.message);
       }
     }
   };
-
-  useEffect(() => {
-    fetchProducts();
-  }, [page]);
-
-  useEffect(() => {
-    fetchProducts();
-  }, [filterText]);
 
   useEffect(() => {
     const userInfo = Cookies.get('userInfo');
@@ -49,7 +43,7 @@ function MainPage() {
     setId(user.id);
     setName(user.name);
     setToken(user.token);
-    fetchProducts();
+    if (id > 0) fetchQuery();
   }, [name]);
 
   // useEffect(() => {
@@ -76,13 +70,21 @@ function MainPage() {
   //   };
   // }, []);
 
-  const handleFilterTextChange = (e) => {
-    setFilterText(e.target.value);
+  const handleCompanyChange = (e) => {
+    setCompany(e.target.value);
   };
   
-  const handlePageChange = (newPage) => {
-    setPage(newPage);
-  };
+  const handleCategoryChange = (e) => {
+    setCategory(e.target.value);
+  }
+
+  const handleMajorConditionsChange = (e) => {
+    setMajor_conditions(e.target.value);
+  }
+
+  const handleMinorConditionsChange = (e) => {
+    setMinor_conditions(e.target.value);
+  }
 
   const handleLogout = () => {
     handleReset();
@@ -94,38 +96,26 @@ function MainPage() {
     navigate('/settings');
   };
  
-  const handleAddToCart = (id) => {
-    setCart((prevCart) =>
-      prevCart.includes(id) ? prevCart.filter((item) => item !== id) : [...prevCart, id]
-    );
-  };
- 
-  const handleShowDetails = (id) => {
-    navigate(`/product/${id}`);
+  const handleResetQuery = () => {
+    setError('');
+    setCompany('');
+    setCategory('');
+    setMajor_conditions('');
+    setMinor_conditions('');
   };
   
-  const handleResetCart = () => {
-    setCart([]);
-  };
-  
-  const handleSaveProceed = () => {
+  const handleSaveProceed = async () => {
     try {
-      cart.forEach(async (item) => {
-        await saveCart(token, id, item);
-    });
+      await addQueryById(token, id, company, category, major_conditions, minor_conditions);
+      alert('Query saved successfully');
+      navigate('/products');
     } catch (err) {
       setError(err.message);
     }
-    alert('Cart saved successfully');
-    navigate('/cart');
   };
   
-  const handlePreviousOrders = () => {
-    navigate('/orders');
-  };
-
   const handleReset = () => {
-    setError('');
+    handleResetQuery();
     setId(0);
   };
   
@@ -134,21 +124,19 @@ function MainPage() {
       {error && <div className='error'>{error}</div>}
       <div>
         <MainComponent 
-          filterText={filterText}
-          products={products}
-          cart={cart}
           name={name}
-          page={page}
-          totalPages={totalPages}
-          handleFilterTextChange={handleFilterTextChange}
-          handlePageChange={handlePageChange}
+          company={company}
+          handleCompanyChange={handleCompanyChange}
+          category={category}
+          handleCategoryChange={handleCategoryChange}
+          major_conditions={major_conditions}
+          handleMajorConditionsChange={handleMajorConditionsChange}
+          minor_conditions={minor_conditions}
+          handleMinorConditionsChange={handleMinorConditionsChange}
           handleSettings={handleSettings} 
           handleLogout={handleLogout} 
-          handleAddToCart={handleAddToCart}
-          handleShowDetails={handleShowDetails}
           handleSaveProceed={handleSaveProceed}
-          handleResetCart={handleResetCart}
-          handlePreviousOrders={handlePreviousOrders}
+          handleResetQuery={handleResetQuery}
         />
       </div>
     </div>

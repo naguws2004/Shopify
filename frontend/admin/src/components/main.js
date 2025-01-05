@@ -16,15 +16,34 @@ const Main = () => {
     navigate('/inventory');
   };
 
-  const handleOrders = () => {
-    navigate('/orders');
+  const handleOrdersCancel = () => {
+    navigate('/orders/cancel');
+  };
+
+  const handleOrdersPay = () => {
+    navigate('/orders/pay');
+  };
+
+  const handleOrdersDispatch = () => {
+    navigate('/orders/dispatch');
+  };
+
+  const handleOrdersReturn = () => {
+    navigate('/orders/return');
+  };
+
+  const handleOrdersCancelled = () => {
+    navigate('/orders/cancelled');
+  };
+
+  const handleOrdersReturned = () => {
+    navigate('/orders/returned');
   };
 
   return (
     <div className="App-main">
-      <header className="App-header-main">
-        <br />
-        <div>Admin Menu</div>
+      <div className='App-header-main'>
+        <h2>Admin Menu</h2>
         <div>
           <button className='button-main' onClick={handleUsers}>Users</button>
         </div>
@@ -34,10 +53,28 @@ const Main = () => {
         <div>
           <button className='button-main' onClick={handleInventory}>Inventory</button>
         </div>
-        <div>
-          <button className='button-main' onClick={handleOrders}>Orders</button>
+        <div className='App-header-sub'>
+          <h3>Orders</h3>
+          <div>
+            <button className='button-main' onClick={handleOrdersCancel}>Cancel</button>
+          </div>
+          <div>
+            <button className='button-main' onClick={handleOrdersPay}>Pay</button>
+          </div>
+          <div>
+            <button className='button-main' onClick={handleOrdersDispatch}>Dispatch</button>
+          </div>
+          <div>
+            <button className='button-main' onClick={handleOrdersReturn}>Return</button>
+          </div>
+          <div>
+            <button className='button-main' onClick={handleOrdersCancelled}>Cancelled</button>
+          </div>
+          <div>
+            <button className='button-main' onClick={handleOrdersReturned}>Returned</button>
+          </div>
         </div>
-      </header>
+      </div>
     </div>
   );
 }

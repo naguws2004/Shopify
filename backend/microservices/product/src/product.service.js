@@ -8,7 +8,6 @@ const db = require('./db');
 const validateToken = (req, res, next) => { 
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
-  console.log('Token:', token);
   if (!token) {
       return res.sendStatus(401); // Unauthorized
   }
@@ -26,7 +25,11 @@ const validateToken = (req, res, next) => {
 router.get('/', validateToken, async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
-  const filterText = req.query.filterText || '';
+  const company = req.query.company ? `%${req.query.company.toLowerCase()}%` : '%';
+  const category = req.query.category ? `%${req.query.category.toLowerCase()}%` : '%';
+  const majorConditions = req.query.majorConditions ? `%${req.query.majorConditions.toLowerCase()}%` : '%';
+  const minorConditions = req.query.minorConditions ? `%${req.query.minorConditions.toLowerCase()}%` : '%';
+  const filterText = req.query.filterText ? `%${req.query.filterText.toLowerCase()}%` : '%';
   const includeQty = req.query.includeQty || false;
   const offset = (page - 1) * limit;
 
@@ -34,21 +37,11 @@ router.get('/', validateToken, async (req, res) => {
     let rows;
     let countResult;
     if (includeQty) {
-      if (filterText) {
-        [rows] = await db.query('SELECT * FROM products WHERE inventory > 0 AND LOWER(name) LIKE ? ORDER BY name LIMIT ? OFFSET ?', [`%${filterText.toLowerCase()}%`, limit, offset]);
-        [countResult] = await db.query('SELECT COUNT(*) as count FROM products WHERE inventory > 0 AND LOWER(name) LIKE ? ', [`%${filterText.toLowerCase()}%`]);
-      } else {
-        [rows] = await db.query('SELECT * FROM products WHERE inventory > 0 ORDER BY name LIMIT ? OFFSET ?', [limit, offset]);
-        [countResult] = await db.query('SELECT COUNT(*) as count FROM products WHERE inventory > 0');
-      }
+      [rows] = await db.query('SELECT * FROM products WHERE inventory > 0 AND LOWER(name) LIKE ? AND LOWER(company) LIKE ? AND LOWER(category) LIKE ? AND LOWER(major_conditions) LIKE ? AND LOWER(minor_conditions) LIKE ? ORDER BY name LIMIT ? OFFSET ?', [filterText, company, category, majorConditions, minorConditions, limit, offset]);
+      [countResult] = await db.query('SELECT COUNT(*) as count FROM products WHERE inventory > 0 AND LOWER(name) LIKE ? AND LOWER(company) LIKE ? AND LOWER(category) LIKE ? AND LOWER(major_conditions) LIKE ? AND LOWER(minor_conditions) LIKE ?', [filterText, company, category, majorConditions, minorConditions]);
     } else {
-      if (filterText) {
-        [rows] = await db.query('SELECT * FROM products WHERE LOWER(name) LIKE ? ORDER BY name LIMIT ? OFFSET ?', [`%${filterText.toLowerCase()}%`, limit, offset]);
-        [countResult] = await db.query('SELECT COUNT(*) as count FROM products WHERE LOWER(name) LIKE ? ', [`%${filterText.toLowerCase()}%`]);
-      } else {
-        [rows] = await db.query('SELECT * FROM products ORDER BY name LIMIT ? OFFSET ?', [limit, offset]);
-        [countResult] = await db.query('SELECT COUNT(*) as count FROM products');
-      }
+      [rows] = await db.query('SELECT * FROM products WHERE LOWER(name) LIKE ? AND LOWER(company) LIKE ? AND LOWER(category) LIKE ? AND LOWER(major_conditions) LIKE ? AND LOWER(minor_conditions) LIKE ? ORDER BY name LIMIT ? OFFSET ?', [filterText, company, category, majorConditions, minorConditions, limit, offset]);
+      [countResult] = await db.query('SELECT COUNT(*) as count FROM products WHERE LOWER(name) LIKE ? AND LOWER(company) LIKE ? AND LOWER(category) LIKE ? AND LOWER(major_conditions) LIKE ? AND LOWER(minor_conditions) LIKE ?', [filterText, company, category, majorConditions, minorConditions]);
     }
     const totalItems = countResult[0].count;
     const totalPages = Math.ceil(totalItems / limit);
@@ -87,7 +80,6 @@ router.post('/', validateToken, async (req, res) => {
     await db.query('INSERT INTO products SET ?', newProduct);
     res.status(201).json(newProduct);
   } catch (err) {
-    console.log(err);
     res.status(500).json({ message: err.message });
   }
 });

@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import OrderComponent from '../components/Order';
 import { getOrderByOrderId, getOrderDetailsByOrderId, cancelOrder, payOrder } from '../services/orderService';
-import { increaseProductInventory } from '../services/inventoryService';
 
 function OrderPage() {
   const { order_id } = useParams();
@@ -21,7 +20,14 @@ function OrderPage() {
     try {
       const fetchOrder = await getOrderByOrderId(token, order_id);
       if (fetchOrder.length > 0) {
-        setOrder(fetchOrder[0]);
+        const selectedOrder = fetchOrder[0];
+        setOrder({
+          ...selectedOrder,
+          order_date: selectedOrder.order_date ? new Date(selectedOrder.order_date).toISOString().slice(0, 10) : '',
+          payment_date: selectedOrder.payment_date ? new Date(selectedOrder.payment_date).toISOString().slice(0, 10) : '',
+          dispatch_date: selectedOrder.dispatch_date ? new Date(selectedOrder.dispatch_date).toISOString().slice(0, 10) : '',
+          cancelled_date: selectedOrder.cancelled_date ? new Date(selectedOrder.cancelled_date).toISOString().slice(0, 10) : ''
+        });
         const fetchProducts = await getOrderDetailsByOrderId(token, order_id);
         setProducts(fetchProducts);
         const sum = fetchProducts.reduce((acc, item) => acc + parseFloat(item.price), 0);
@@ -50,29 +56,29 @@ function OrderPage() {
     checkUser();
   }, [id, navigate]);
 
-  // useEffect(() => {
-  //   const handleActivity = () => {
-  //     if (timeoutRef.current) {
-  //       clearTimeout(timeoutRef.current);
-  //     }
-  //     timeoutRef.current = setTimeout(() => {
-  //       handleLogout();
-  //     }, 60000); // 1 minute
-  //   };
+  useEffect(() => {
+    const handleActivity = () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout(() => {
+        handleLogout();
+      }, 60000); // 1 minute
+    };
 
-  //   window.addEventListener('mousemove', handleActivity);
-  //   window.addEventListener('keydown', handleActivity);
+    window.addEventListener('mousemove', handleActivity);
+    window.addEventListener('keydown', handleActivity);
 
-  //   handleActivity(); // Initialize the timeout
+    handleActivity(); // Initialize the timeout
 
-  //   return () => {
-  //     if (timeoutRef.current) {
-  //       clearTimeout(timeoutRef.current);
-  //     }
-  //     window.removeEventListener('mousemove', handleActivity);
-  //     window.removeEventListener('keydown', handleActivity);
-  //   };
-  // }, []);
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      window.removeEventListener('mousemove', handleActivity);
+      window.removeEventListener('keydown', handleActivity);
+    };
+  }, []);
 
   const handleLogout = () => {
     handleReset();
@@ -91,7 +97,6 @@ function OrderPage() {
   const handleCancelOrder = async () => {
     try {
       await cancelOrder(token, order_id);
-      await increaseProductInventory(token, products.filter(product => product.id));
       alert('Order cancelled');
       handleReset();
       navigate('/main');

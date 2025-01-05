@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const db = require('./db');
+const { reduceInventory, increaseInventory, updateAddress, deleteCart } = require('./order.eventProducer');
 
 // Middleware to validate JWT token
 const validateToken = (req, res, next) => { 
@@ -95,7 +96,9 @@ router.post('/', validateToken, async (req, res) => {
 
     const [result] = await db.query(query, params);
     if (result.affectedRows > 0) {
-      res.status(201).json({ message: 'order added successfully', order_id: result.insertId });
+      const order_id = result.insertId;
+      deleteCart(order_id);
+      res.status(201).json({ message: 'order added successfully', order_id });
     } else {
       res.status(500).json({ message: 'Failed to add order' });
     }
@@ -114,6 +117,7 @@ router.post('/detail', validateToken, async (req, res) => {
 
     const [result] = await db.query(query, params);
     if (result.affectedRows > 0) {
+      await reduceInventory(product_id);
       res.status(201).json({ message: 'order added successfully' });
     } else {
       res.status(500).json({ message: 'Failed to add order' });
@@ -133,6 +137,7 @@ router.post('/address', validateToken, async (req, res) => {
 
     const [result] = await db.query(query, params);
     if (result.affectedRows > 0) {
+      await updateAddress(order_id, address, city, state, pincode, contactno);
       res.status(201).json({ message: 'address added successfully' });
     } else {
       console.log(result);
@@ -175,7 +180,29 @@ try {
   const [result] = await db.query(query, params);
 
   if (result.affectedRows > 0) {
-      res.status(200).json({ message: 'order updated successfully' });
+    await increaseInventory(order_id);
+    res.status(200).json({ message: 'order updated successfully' });
+  } else {
+    res.status(404).json({ message: 'order not found' });
+  }
+} catch (err) {
+  res.status(500).json({ message: err.message });
+}
+});
+
+// Update an order 
+router.put('/return/:order_id', validateToken, async (req, res) => {
+  const { order_id } = req.params;
+
+try {
+  const params = [order_id];
+
+  const query = 'UPDATE orders SET cancelled_date = CURDATE(), status = \'RETURNED\' WHERE id = ?';
+  const [result] = await db.query(query, params);
+
+  if (result.affectedRows > 0) {
+    await increaseInventory(order_id);
+    res.status(200).json({ message: 'order updated successfully' });
   } else {
     res.status(404).json({ message: 'order not found' });
   }

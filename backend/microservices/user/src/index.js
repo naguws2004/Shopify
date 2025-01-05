@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const userRouter = require('./user.service'); 
 const swaggerSetup = require('./swagger');
+const kafkaSetup = require('./user.eventConsumer');
 
 const app = express();
 const port = 5001; // Replace with your desired port
@@ -14,6 +15,9 @@ app.use('/api/users', userRouter);
 
 // Setup Swagger
 swaggerSetup(app);
+
+// Start Kafka consumer
+kafkaSetup();
 
 app.listen(port, () => {
   console.log(`User Service listening on port ${port}`);

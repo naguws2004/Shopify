@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import ShippingComponent from '../components/Shipping';
-import { getAddressById, addAddressById, deleteAddressById } from '../services/authService';
+import { getAddressById } from '../services/userService';
 import { createOrder, createOrderDetail, addOrderAddressById } from '../services/orderService';
-import { getCartByUserId, deleteCartByUserId } from '../services/cartService';
-import { reduceProductInventory } from '../services/inventoryService';
+import { getCartByUserId } from '../services/cartService';
 
 function ShippingPage() {
   const [error, setError] = useState('');
@@ -83,17 +82,13 @@ function ShippingPage() {
       return;
     }
     try {
-      await deleteAddressById(token, id);
-      await addAddressById(token, id, address, city, state, pincode, contactno);
-      const fetchedCart = await getCartByUserId(token, id);
       const result = await createOrder(token, id);
+      const fetchedCart = await getCartByUserId(token, id);
       for (const element of fetchedCart) {
         await createOrderDetail(token, result.order_id, element.product_id);
       }
-      await reduceProductInventory(token, fetchedCart.filter((element) => element.product_id)); 
       await addOrderAddressById(token, result.order_id, address, city, state, pincode, contactno);
       alert('Order created successfully');
-      await deleteCartByUserId(token, id);
       setError('');
       navigate(`/order/${result.order_id}`);
     } catch (err) {

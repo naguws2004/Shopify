@@ -1,8 +1,9 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import MainPage from './pages/MainPage';
 import SettingPage from './pages/SettingPage';
+import MainPage from './pages/MainPage';
+import ProductsPage from './pages/ProductsPage';
 import ProductPage from './pages/ProductPage';
 import CartPage from './pages/CartPage';
 import ShippingPage from './pages/ShippingPage';
@@ -19,8 +20,9 @@ function App() {
             <Route path="/" element={<LoginPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            <Route path="/main" element={<MainPage />} />
             <Route path="/settings" element={<SettingPage />} />
+            <Route path="/main" element={<MainPage />} />
+            <Route path="/products" element={<ProductsPage />} />
             <Route path="/product/:id" element={<ProductPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/shipping" element={<ShippingPage />} />

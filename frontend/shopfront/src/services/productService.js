@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { API_URL_PRODUCTS } from '../common/constants';
 
-export const getProducts = async (token, page, filterText) => {
+export const getProducts = async (token, page, filterText, company, category, majorConditions, minorConditions) => {
   const limit = 8;
   try {
     const response = await axios.get(`${API_URL_PRODUCTS}/`, {
@@ -12,6 +12,10 @@ export const getProducts = async (token, page, filterText) => {
       params: {
         page,
         limit,
+        company,
+        category,
+        majorConditions,
+        minorConditions,
         filterText: filterText.trim(),
         includeQty: true
       }

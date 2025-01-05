@@ -6,7 +6,7 @@ const router = express.Router();
 module.exports = async (app) => {
     const definition = swaggerJSDoc({
         swaggerDefinition: { ...require('./swagger.json') },
-        apis: ['./inventory.service.js']
+        apis: ['./user.service.js']
     });
     router.use('/', swaggerUi.serve, swaggerUi.setup(
         definition

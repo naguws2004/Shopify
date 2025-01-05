@@ -59,6 +59,7 @@ const Users = () => {
         }
       }));
       alert('Users updated successfully');
+      fetchUsers();
       handleReset();
     } catch (err) {
       setError(err.message);

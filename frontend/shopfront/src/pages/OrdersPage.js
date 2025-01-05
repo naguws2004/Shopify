@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import OrdersComponent from '../components/Orders';
-import { getOrders, cancelOrder, payOrder } from '../services/orderService';
+import { getOrders, payOrder, cancelOrder, returnOrder, getOrderDetailsByOrderId } from '../services/orderService';
 
 function OrdersPage() {
   const blankOrder = {
@@ -18,10 +18,10 @@ function OrdersPage() {
   const [error, setError] = useState('');
   const [orders, setOrders] = useState([]);
   const [order, setOrder] = useState(blankOrder);
+  const [products, setProducts] = useState([]);
   const [id, setId] = useState(0);
   const [name, setName] = useState('');
   const [isUpdateMode, setIsUpdateMode] = useState(false);
-  const [filterText, setFilterText] = useState('');
   const [filterOrderId, setFilterOrderId] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [page, setPage] = useState(1);
@@ -33,7 +33,7 @@ function OrdersPage() {
   const fetchOrders = async () => {
     if (id > 0) {
       try {
-        const fetchedOrders = await getOrders(token, page, id, filterText.trim(), filterOrderId.trim(), filterStatus.trim());
+        const fetchedOrders = await getOrders(token, page, id, filterOrderId.trim(), filterStatus.trim());
         setOrders(fetchedOrders.orders);
         setTotalPages(fetchedOrders.pages);
         handleReset();
@@ -61,37 +61,33 @@ function OrdersPage() {
     checkUser();
   }, [id, navigate]);
 
-  // useEffect(() => {
-  //   const handleActivity = () => {
-  //     if (timeoutRef.current) {
-  //       clearTimeout(timeoutRef.current);
-  //     }
-  //     timeoutRef.current = setTimeout(() => {
-  //       handleLogout();
-  //     }, 60000); // 1 minute
-  //   };
+  useEffect(() => {
+    const handleActivity = () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout(() => {
+        handleLogout();
+      }, 60000); // 1 minute
+    };
 
-  //   window.addEventListener('mousemove', handleActivity);
-  //   window.addEventListener('keydown', handleActivity);
+    window.addEventListener('mousemove', handleActivity);
+    window.addEventListener('keydown', handleActivity);
 
-  //   handleActivity(); // Initialize the timeout
+    handleActivity(); // Initialize the timeout
 
-  //   return () => {
-  //     if (timeoutRef.current) {
-  //       clearTimeout(timeoutRef.current);
-  //     }
-  //     window.removeEventListener('mousemove', handleActivity);
-  //     window.removeEventListener('keydown', handleActivity);
-  //   };
-  // }, []);
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      window.removeEventListener('mousemove', handleActivity);
+      window.removeEventListener('keydown', handleActivity);
+    };
+  }, []);
 
   useEffect(() => {
     fetchOrders();
   }, [page]);
-
-  useEffect(() => {
-    fetchOrders();
-  }, [filterText]);
 
   useEffect(() => {
     fetchOrders();
@@ -120,22 +116,31 @@ function OrdersPage() {
     navigate('/settings');
   };
 
-  const handleOrderClick = (id) => {
+  const handleOrderClick = async (id) => {
     handleReset();
     const selectedOrder = orders.find(order => order.id === id);
-    setOrder(selectedOrder);
+    setOrder({
+      ...selectedOrder,
+      order_date: selectedOrder.order_date ? new Date(selectedOrder.order_date).toISOString().slice(0, 10) : '',
+      payment_date: selectedOrder.payment_date ? new Date(selectedOrder.payment_date).toISOString().slice(0, 10) : '',
+      dispatch_date: selectedOrder.dispatch_date ? new Date(selectedOrder.dispatch_date).toISOString().slice(0, 10) : '',
+      cancelled_date: selectedOrder.cancelled_date ? new Date(selectedOrder.cancelled_date).toISOString().slice(0, 10) : ''
+    });
     setIsUpdateMode(true); // Enable update mode
-  };
+    const fetchedItems = await getOrderDetailsByOrderId(token, selectedOrder.id);
+    setProducts(fetchedItems);
+};
 
   const handleReset = () => {
     setOrder(blankOrder);
+    setProducts([]);
     setError('');
     setIsUpdateMode(false); // Disable update mode
   };
 
   const handleOrderPay = async () => {
     try {
-      await payOrder(id);
+      await payOrder(token, order.id);
       alert('Order updated successfully');
       fetchOrders();
     } catch (err) {
@@ -145,8 +150,7 @@ function OrdersPage() {
 
   const handleOrderCancel = async () => {
     try {
-      await cancelOrder(id);
-      ///*** increase inventory */
+      await cancelOrder(token, order.id);
       alert('Order updated successfully');
       fetchOrders();
     } catch (err) {
@@ -154,8 +158,18 @@ function OrdersPage() {
     }
   };
 
-  const handleFilterTextChange = (e) => {
-    setFilterText(e.target.value);
+  const handleOrderReturn = async () => {
+    try {
+      await returnOrder(token, order.id);
+      alert('Order updated successfully');
+      fetchOrders();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+  
+  const handleShowDetails = (id) => {
+    navigate(`/product/${id}`);
   };
 
   const handleFilterOrderIdChange = (e) => {
@@ -182,6 +196,7 @@ function OrdersPage() {
           handleFilterStatusChange={handleFilterStatusChange}
           orders={orders}
           order={order}
+          products={products}
           isUpdateMode={isUpdateMode}
           page={page}
           totalPages={totalPages}
@@ -191,6 +206,8 @@ function OrdersPage() {
           handleReset={handleReset}
           handleOrderPay={handleOrderPay}
           handleOrderCancel={handleOrderCancel}
+          handleOrderReturn={handleOrderReturn}
+          handleShowDetails={handleShowDetails}
           handleSettings={handleSettings}
           handleLogout={handleLogout}
         />

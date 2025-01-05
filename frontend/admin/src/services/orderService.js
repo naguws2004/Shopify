@@ -64,7 +64,20 @@ export const cancelOrder = async (id, cancelled_date) => {
         'Content-Type': 'application/json'
       },
     });
-    //*** update inventory */
+    return response.data;
+  } catch (error) {
+    alert(error);
+    throw new Error('Failed to update order');
+  }
+};
+
+export const returnOrder = async (id, returned_date) => {
+  try {
+    const response = await axios.put(`${API_URL}/orders/return/${id}`, { returned_date }, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    });
     return response.data;
   } catch (error) {
     alert(error);

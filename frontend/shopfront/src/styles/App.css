@@ -40,6 +40,10 @@ button:disabled {
   text-align: center;
 }
 
+body {
+  background-color: #21a1f1;
+}
+
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
@@ -106,7 +110,22 @@ button:disabled {
 }
 
 .order-form {
-  padding: 10px;
+  display: grid;
+  grid-template-rows: 2fr 1.5fr;
+  gap: 6px;
+}
+
+.order-form-list {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
+  overflow-y: auto;
+  max-height: 287px;
+}
+
+.order-form-form {
   border: 1px solid #ccc;
   border-radius: 5px;
 }

@@ -341,9 +341,52 @@ router.put('/orders/cancel/:id', async (req, res) => {
     } else {
       res.status(404).json({ message: 'order not found' });
     }
+
+    await updateInventory(id);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
+
+// Update an order 
+router.put('/orders/return/:id', async (req, res) => {
+  const { id } = req.params;
+  const { returned_date } = req.body;
+
+  try {
+    const parsedDate = parseISO(returned_date);
+    const formattedDate = format(parsedDate, 'yyyy-MM-dd HH:mm:ss');
+    const params = [formattedDate, id];
+
+    const query = 'UPDATE orders SET cancelled_date = ?, status = \'RETURNED\' WHERE id = ?';
+    const [result] = await db.query(query, params);
+
+    if (result.affectedRows > 0) {
+        res.status(200).json({ message: 'order updated successfully' });
+    } else {
+      res.status(404).json({ message: 'order not found' });
+    }
+
+    await updateInventory(id);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+updateInventory = async (order_id) => {
+  try {
+    const query = 'SELECT product_id FROM order_details WHERE id = ?';
+    const params = [order_id];
+    const [rows] = await db.query(query, params);
+
+    rows.forEach(async (row) => {
+      const query = 'UPDATE products SET inventory = inventory + 1 WHERE id = ?';
+      const params = [row.product_id];
+      await db.query(query, params);
+    });
+  } catch (err) {
+    console.log(err);
+  }
+}
 
 module.exports = router;
