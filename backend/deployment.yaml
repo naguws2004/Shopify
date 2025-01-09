@@ -1,43 +1,48 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: Pod
 metadata:
-  name: shopify-apigateway-deployemnt
+  name: shopify-app-pod
+  labels:
+    app: shopify-app
 spec:
-  # Number of pods to create
-  replicas: 1 
-  selector:
-    matchLabels:
-      app: shopify-node-app
-  template:
-    metadata:
-      labels:
-        app: shopify-node-app
-    spec:
-      containers:
-      - name: api-gateway-container
-        image: apigateway:latest
-        ports:
-        - containerPort: 5000
+  containers:
+  - name: api-gateway-container
+    image: naguws2004/apigateway:latest
+    ports:
+    - containerPort: 5000
+  - name: user-service-container
+    image: naguws2004/userservice:latest 
+    ports:
+    - containerPort: 5001
+  - name: product-service-container
+    image: naguws2004/productservice:latest 
+    ports:
+    - containerPort: 5002
+  - name: inventory-service-container
+    image: naguws2004/inventoryservice:latest 
+    ports:
+    - containerPort: 5003
+  - name: cart-service-container
+    image: naguws2004/cartservice:latest 
+    ports:
+    - containerPort: 5004
+  - name: order-service-container
+    image: naguws2004/orderservice:latest 
+    ports:
+    - containerPort: 5005
 
-  # - name: user-service-container
-  #   image: userservice:latest 
-  #   ports:
-  #   - containerPort: 5001
-  # - name: product-service-container
-  #   image: productservice:latest 
-  #   ports:
-  #   - containerPort: 5002
-  # - name: inventory-service-container
-  #   image: inventoryservice:latest 
-  #   ports:
-  #   - containerPort: 5003
-  # - name: cart-service-container
-  #   image: cartservice:latest 
-  #   ports:
-  #   - containerPort: 5004
-  # - name: order-service-container
-  #   image: orderservice:latest 
-  #   ports:
-  #   - containerPort: 5005
+# docker tag apigateway naguws2004/apigateway:latest
+# docker push naguws2004/apigateway:latest
+# docker tag userservice naguws2004/userservice:latest
+# docker push naguws2004/userservice:latest
+# docker tag productservice naguws2004/productservice:latest
+# docker push naguws2004/productservice:latest
+# docker tag inventoryservice naguws2004/inventoryservice:latest
+# docker push naguws2004/inventoryservice:latest
+# docker tag cartservice naguws2004/cartservice:latest
+# docker push naguws2004/cartservice:latest
+# docker tag orderservice naguws2004/orderservice:latest
+# docker push naguws2004/orderservice:latest
 
 # kubectl apply -f deployment.yaml        
+# kubectl port-forward shopify-app-pod 5000:5000 5001:5001 5002:5002 5003:5003 5004:5004 5005:5005

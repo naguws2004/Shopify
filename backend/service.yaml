@@ -4,7 +4,7 @@ metadata:
   name: shopify-app-service
 spec:
   selector:
-    app: shopify-node-app
+    app: shopify-app
   type: NodePort 
   ports:
   - name: "api-gateway" 
