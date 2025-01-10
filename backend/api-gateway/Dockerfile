@@ -18,5 +18,5 @@ EXPOSE 5000
 # Command to start your Node.js app
 CMD ["npm", "start"] 
 
-# docker build -t apigateway:latest . 
-# docker run -p 5000:5000 apigateway:latest
+# docker build -t naguws2004/apigateway:latest . 
+# docker run -p 5000:5000 naguws2004/apigateway:latest

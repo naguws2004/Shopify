@@ -18,5 +18,5 @@ EXPOSE 5001
 # Command to start your Node.js app
 CMD ["npm", "start"] 
 
-# docker build -t userservice:latest . 
-# docker run -p 5001:5001 userservice:latest
+# docker build -t naguws2004/userservice:latest . 
+# docker run -p 5001:5001 naguws2004/userservice:latest

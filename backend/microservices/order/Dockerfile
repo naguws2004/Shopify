@@ -19,4 +19,4 @@ EXPOSE 5005
 CMD ["npm", "start"] 
 
 # docker build -t orderservice:latest . 
-# docker run -p 5005:5005 orderservice:latest
+# docker run -p 5005:5005 naguws2004/orderservice:latest

@@ -23,6 +23,10 @@ const validateToken = (req, res, next) => {
   });
 }
 
+router.get('/ping', async (req, res) => {
+  return res.status(200).json({ message: 'Online' });
+});
+
 router.get('/login', async (req, res) => {
   const { email, password } = req.query;
   const query = 'SELECT * FROM users WHERE email = ?';

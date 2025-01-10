@@ -19,4 +19,4 @@ EXPOSE 5002
 CMD ["npm", "start"] 
 
 # docker build -t productservice:latest . 
-# docker run -p 5002:5002 productservice:latest
+# docker run -p 5002:5002 naguws2004/productservice:latest

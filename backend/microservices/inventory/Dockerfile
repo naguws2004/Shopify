@@ -19,4 +19,4 @@ EXPOSE 5003
 CMD ["npm", "start"] 
 
 # docker build -t inventoryservice:latest . 
-# docker run -p 5003:5003 inventoryservice:latest
+# docker run -p 5003:5003 naguws2004/inventoryservice:latest

@@ -19,4 +19,4 @@ EXPOSE 5004
 CMD ["npm", "start"] 
 
 # docker build -t cartservice:latest . 
-# docker run -p 5004:5004 cartservice:latest
+# docker run -p 5004:5004 naguws2004/cartservice:latest

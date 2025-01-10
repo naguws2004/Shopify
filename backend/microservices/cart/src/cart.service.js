@@ -21,6 +21,10 @@ const validateToken = (req, res, next) => {
   });
 }
 
+router.get('/ping', async (req, res) => {
+  return res.status(200).json({ message: 'Online' });
+});
+
 // Get all products in the cart for a user
 router.get('/:user_id', validateToken, async (req, res) => {
     const { user_id } = req.params;
