@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const swaggerSetup = require('./swagger');
 const circuitBreakerProxy = require('./circuitBreaker');
+const proxyService = require('./proxyService');
 
 const app = express();
 
@@ -13,11 +14,11 @@ const port = 5000; // Replace with your desired port
 // Setup Swagger
 swaggerSetup(app);
 
+// setup circuit breaker
+circuitBreakerProxy();
+
 app.all('/api/:service/*', (req, res) => {
-    console.log(JSON.stringify(req.headers));
-    // setup circuit breaker
-    circuitBreakerProxy(req, res);
-    //circuitBreakerProxy.circuitStatus[req.params.service] = circuitBreakerProxy.status.CLOSED;
+    proxyService(req, res);
 });
 
 app.listen(port, () => {
