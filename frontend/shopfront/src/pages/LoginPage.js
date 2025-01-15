@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Cookies from 'js-cookie';
+import { setCookie, removeCookie } from '../common/cookieManager';
 import { useNavigate, Link } from 'react-router-dom';
 import { login } from '../services/authService';
 import { getCartByUserId } from '../services/cartService';
@@ -13,7 +13,7 @@ function LoginPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    Cookies.remove('userInfo'); // Remove the cookie when the component mounts
+    removeCookie('userInfo'); // Remove the cookie when the component mounts
   }, []);
 
   const handleSubmit = async (e) => {
@@ -21,7 +21,7 @@ function LoginPage() {
     try {
       const userInfo = await login(email, password);
       setError('');
-      Cookies.set('userInfo', JSON.stringify(userInfo), { expires: 1 }); // Set token cookie for 1 day
+      setCookie('userInfo', userInfo, { expires: 1 }); // Set token cookie for 1 day
       alert('Logged in successfully');
       const cart = await getCartByUserId(userInfo.token, userInfo.id);
       if (cart.length > 0) {

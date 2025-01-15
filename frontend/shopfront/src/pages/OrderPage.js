@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import Cookies from 'js-cookie';
+import { getCookie } from '../common/cookieManager';
+import { encryptString, decryptString } from '../common/encryptionManager';
 import OrderComponent from '../components/Order';
 import { getOrderByOrderId, getOrderDetailsByOrderId, cancelOrder, payOrder } from '../services/orderService';
 
 function OrderPage() {
   const { order_id } = useParams();
+  const [orderId, setOrderId] = useState('');
   const [error, setError] = useState('');
   const [order, setOrder] = useState({});
   const [products, setProducts] = useState([]);
@@ -18,7 +20,9 @@ function OrderPage() {
   
   const fetchOrder = async () => {
     try {
-      const fetchOrder = await getOrderByOrderId(token, order_id);
+      const oid = decryptString(order_id);
+      setOrderId(oid);
+      const fetchOrder = await getOrderByOrderId(token, oid);
       if (fetchOrder.length > 0) {
         const selectedOrder = fetchOrder[0];
         setOrder({
@@ -28,7 +32,7 @@ function OrderPage() {
           dispatch_date: selectedOrder.dispatch_date ? new Date(selectedOrder.dispatch_date).toISOString().slice(0, 10) : '',
           cancelled_date: selectedOrder.cancelled_date ? new Date(selectedOrder.cancelled_date).toISOString().slice(0, 10) : ''
         });
-        const fetchProducts = await getOrderDetailsByOrderId(token, order_id);
+        const fetchProducts = await getOrderDetailsByOrderId(token, oid);
         setProducts(fetchProducts);
         const sum = fetchProducts.reduce((acc, item) => acc + parseFloat(item.price), 0);
         setTotalPrice(sum.toFixed(2));
@@ -40,16 +44,15 @@ function OrderPage() {
 
   useEffect(() => {
     const checkUser = async () => {
-      const userInfo = Cookies.get('userInfo');
+      const userInfo = getCookie('userInfo');
       if (!userInfo) {
-        alert('User is not logged in');
+        alert('User is logging out');
         navigate('/');
         return;
       }
-      const user = JSON.parse(userInfo);
-      setId(user.id);
-      setName(user.name);
-      setToken(user.token);
+      setId(userInfo.id);
+      setName(userInfo.name);
+      setToken(userInfo.token);
       if (id > 0) await fetchOrder();
     };
 
@@ -63,7 +66,7 @@ function OrderPage() {
       }
       timeoutRef.current = setTimeout(() => {
         handleLogout();
-      }, 60000); // 1 minute
+      }, 300000); // 5 minute
     };
 
     window.addEventListener('mousemove', handleActivity);
@@ -81,9 +84,8 @@ function OrderPage() {
   }, []);
 
   const handleLogout = () => {
-    handleReset();
-    Cookies.remove('userInfo'); // Remove the cookie when the component mounts
-    window.history.back();
+    alert('User is logging out');
+    navigate('/');
   };
 
   const handleSettings = () => {
@@ -91,12 +93,13 @@ function OrderPage() {
   };
  
   const handleShowDetails = (id) => {
-    navigate(`/product/${id}`);
+    const encryptedId = encryptString(id.toString());
+    navigate(`/product/${encryptedId}`);
   };
   
   const handleCancelOrder = async () => {
     try {
-      await cancelOrder(token, order_id);
+      await cancelOrder(token, orderId);
       alert('Order cancelled');
       handleReset();
       navigate('/main');
@@ -107,7 +110,7 @@ function OrderPage() {
   
   const handleMakePayment = async () => {
     try {
-      await payOrder(token, order_id);
+      await payOrder(token, orderId);
       alert('Payment successful');
       handleReset();
       navigate('/main');

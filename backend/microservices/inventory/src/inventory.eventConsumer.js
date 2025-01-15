@@ -1,5 +1,6 @@
 const { Kafka } = require('kafkajs');
 const db = require('./db');
+const { confirmOrder, cancelOrder } = require('./inventory.eventProducer');
 
 module.exports = async () => {
   const kafka = new Kafka({
@@ -23,22 +24,28 @@ module.exports = async () => {
         const data = JSON.parse(message.value.toString());
 
         if (topic === 'reduce-inventory') {
-          const { product_id } = data;
+          const { order_id, product_ids } = data;
           try {
-            const query = 'UPDATE products SET inventory = inventory - 1 WHERE id = ?';
-            const params = [product_id];
-            await db.query(query, params);
-            console.log(`Inventory reduced for product_id: ${product_id}`);
+            for (const product_id of product_ids) {
+              const query = 'UPDATE products SET inventory = inventory - 1 WHERE id = ?';
+              const params = [product_id];
+              await db.query(query, params);
+              console.log(`Inventory reduced for product_id: ${product_id}`);
+            }
+            await confirmOrder(order_id, 'inventory');
           } catch (err) {
             console.error('Failed to reduce inventory:', err);
           }
         } else if (topic === 'increase-inventory') {
-          const { product_id } = data;
+          const { order_id, product_ids } = data;
           try {
-            const query = 'UPDATE products SET inventory = inventory + 1 WHERE id = ?';
-            const params = [product_id];
-            await db.query(query, params);
-            console.log(`Inventory increased for product_id: ${product_id}`);
+            for (const product_id of product_ids) {
+              const query = 'UPDATE products SET inventory = inventory + 1 WHERE id = ?';
+              const params = [product_id];
+              await db.query(query, params);
+              console.log(`Inventory increased for product_id: ${product_id}`);
+            }
+            await cancelOrder(order_id, 'inventory');
           } catch (err) {
             console.error('Failed to increase inventory:', err);
           }

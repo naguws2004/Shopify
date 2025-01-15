@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import Cookies from 'js-cookie';
+import { getCookie } from '../common/cookieManager';
+import { decryptString } from '../common/encryptionManager';
 import ProductComponent from '../components/Product';
 import { getProduct } from '../services/productService';
 
@@ -20,7 +21,8 @@ function ProductPage() {
 
   const fetchProduct = async (token) => {
     try {
-      const fetchedProduct = await getProduct(token, id);
+      const decryptedId = decryptString(id);
+      const fetchedProduct = await getProduct(token, decryptedId);
       setProduct(fetchedProduct);
     } catch (error) {
       setError('Failed to fetch product');
@@ -28,15 +30,14 @@ function ProductPage() {
   };
 
   useEffect(() => {
-    const userInfo = Cookies.get('userInfo');
+    const userInfo = getCookie('userInfo');
     if (!userInfo) {
-      alert('User is not logged in');
+      alert('User is logging out');
       navigate('/');
       return;
     }
-    const user = JSON.parse(userInfo);
-    setUserName(user.name);
-    fetchProduct(user.token);
+    setUserName(userInfo.name);
+    fetchProduct(userInfo.token);
   }, [id]);
 
   useEffect(() => {
@@ -52,8 +53,8 @@ function ProductPage() {
   }, [product]);
 
   const handleLogout = () => {
-    Cookies.remove('userInfo'); // Remove the cookie when the component mounts
-    window.history.back();
+    alert('User is logging out');
+    navigate('/');
   };
 
   const handleSettings = () => {

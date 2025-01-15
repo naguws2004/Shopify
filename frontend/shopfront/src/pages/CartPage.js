@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Cookies from 'js-cookie';
+import { getCookie } from '../common/cookieManager';
+import { encryptString } from '../common/encryptionManager';
 import CartComponent from '../components/Cart';
 import { getCartByUserId, deleteCartByUserId } from '../services/cartService';
 
@@ -13,7 +14,7 @@ function CartPage() {
   const [token, setToken] = useState('');
   const navigate = useNavigate();
   const timeoutRef = useRef(null);
-  
+
   const fetchCart = async () => {
     try {
       const fetchedCart = await getCartByUserId(token, id);
@@ -27,50 +28,48 @@ function CartPage() {
 
   useEffect(() => {
     const checkUser = async () => {
-      const userInfo = Cookies.get('userInfo');
+      const userInfo = getCookie('userInfo');
       if (!userInfo) {
-        alert('User is not logged in');
+        alert('User is logging out');
         navigate('/');
         return;
       }
-      const user = JSON.parse(userInfo);
-      setId(user.id);
-      setName(user.name);
-      setToken(user.token);
+      setId(userInfo.id);
+      setName(userInfo.name);
+      setToken(userInfo.token);
       if (id > 0) await fetchCart();
     };
 
     checkUser();
   }, [id, navigate]);
 
-  // useEffect(() => {
-  //   const handleActivity = () => {
-  //     if (timeoutRef.current) {
-  //       clearTimeout(timeoutRef.current);
-  //     }
-  //     timeoutRef.current = setTimeout(() => {
-  //       handleLogout();
-  //     }, 60000); // 1 minute
-  //   };
+  useEffect(() => {
+    const handleActivity = () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout(() => {
+        handleLogout();
+      }, 300000); // 5 minute
+    };
 
-  //   window.addEventListener('mousemove', handleActivity);
-  //   window.addEventListener('keydown', handleActivity);
+    window.addEventListener('mousemove', handleActivity);
+    window.addEventListener('keydown', handleActivity);
 
-  //   handleActivity(); // Initialize the timeout
+    handleActivity(); // Initialize the timeout
 
-  //   return () => {
-  //     if (timeoutRef.current) {
-  //       clearTimeout(timeoutRef.current);
-  //     }
-  //     window.removeEventListener('mousemove', handleActivity);
-  //     window.removeEventListener('keydown', handleActivity);
-  //   };
-  // }, []);
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      window.removeEventListener('mousemove', handleActivity);
+      window.removeEventListener('keydown', handleActivity);
+    };
+  }, []);
 
   const handleLogout = () => {
-    handleReset();
-    Cookies.remove('userInfo'); // Remove the cookie when the component mounts
-    window.history.back();
+    alert('User is logging out');
+    navigate('/');
   };
 
   const handleSettings = () => {
@@ -78,7 +77,8 @@ function CartPage() {
   };
  
   const handleShowDetails = (id) => {
-    navigate(`/product/${id}`);
+    const encryptedId = encryptString(id.toString());
+    navigate(`/product/${encryptedId}`);
   };
   
   const handleCancelCart = async () => {

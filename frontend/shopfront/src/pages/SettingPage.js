@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Cookies from 'js-cookie';
+import { setCookie, getCookie } from '../common/cookieManager';
 import SettingComponent from '../components/Setting';
 import { updateUser, updateUserPassword } from '../services/userService';
 
@@ -13,12 +13,11 @@ function SettingPage() {
   const [changePassword, setChangePassword] = useState(false);
   
   useEffect(() => {
-    const userInfo = Cookies.get('userInfo');
+    const userInfo = getCookie('userInfo');
     if (userInfo) {
-      const user = JSON.parse(userInfo);
-      setId(user.id);
-      setName(user.name);
-      setToken(user.token);
+      setId(userInfo.id);
+      setName(userInfo.name);
+      setToken(userInfo.token);
     }
   }, []);
 
@@ -42,10 +41,9 @@ function SettingPage() {
       setError('');
       // show success message
       alert('Settings updated successfully');
-      const userInfo = Cookies.get('userInfo');
-      const user = JSON.parse(userInfo);
-      user.name = name;
-      Cookies.set('userInfo', JSON.stringify(user), { expires: 1 }); // Set token cookie for 1 day
+      const userInfo = getCookie('userInfo');
+      userInfo.name = name;
+      setCookie('userInfo', userInfo, { expires: 1 }); // Set token cookie for 1 day
       // Redirect to main page
       window.history.back();
     } catch (err) {

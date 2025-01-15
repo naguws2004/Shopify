@@ -17,11 +17,11 @@ export const createOrder = async (token, user_id) => {
   }
 };
 
-export const createOrderDetail = async (token, order_id, product_id) => {
+export const createOrderDetail = async (token, order_id, product_ids) => {
   try {
     const response = await axios.post(`${API_URL_ORDERS}/detail`, {
       order_id,
-      product_id
+      product_ids
     }, 
     {
       headers: {
@@ -30,7 +30,6 @@ export const createOrderDetail = async (token, order_id, product_id) => {
     }});
     return response.data;
   } catch (error) {
-    alert(error);
     throw new Error('Order detail creation failed');
   }
 };

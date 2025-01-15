@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Cookies from 'js-cookie';
+import { getCookie } from '../common/cookieManager';
+import { encryptString } from '../common/encryptionManager';
 import OrdersComponent from '../components/Orders';
 import { getOrders, payOrder, cancelOrder, returnOrder, getOrderDetailsByOrderId } from '../services/orderService';
 
@@ -45,16 +46,15 @@ function OrdersPage() {
 
   useEffect(() => {
     const checkUser = async () => {
-      const userInfo = Cookies.get('userInfo');
+      const userInfo = getCookie('userInfo');
       if (!userInfo) {
-        alert('User is not logged in');
+        alert('User is logging out');
         navigate('/');
         return;
       }
-      const user = JSON.parse(userInfo);
-      setId(user.id);
-      setName(user.name);
-      setToken(user.token);
+      setId(userInfo.id);
+      setName(userInfo.name);
+      setToken(userInfo.token);
       await fetchOrders();
     };
 
@@ -68,7 +68,7 @@ function OrdersPage() {
       }
       timeoutRef.current = setTimeout(() => {
         handleLogout();
-      }, 60000); // 1 minute
+      }, 300000); // 5 minute
     };
 
     window.addEventListener('mousemove', handleActivity);
@@ -107,9 +107,8 @@ function OrdersPage() {
   };
   
   const handleLogout = () => {
-    handleReset();
-    Cookies.remove('userInfo'); // Remove the cookie when the component mounts
-    window.history.back();
+    alert('User is logging out');
+    navigate('/');
   };
 
   const handleSettings = () => {
@@ -169,7 +168,8 @@ function OrdersPage() {
   };
   
   const handleShowDetails = (id) => {
-    navigate(`/product/${id}`);
+    const encryptedId = encryptString(id.toString());
+    navigate(`/product/${encryptedId}`);
   };
 
   const handleFilterOrderIdChange = (e) => {

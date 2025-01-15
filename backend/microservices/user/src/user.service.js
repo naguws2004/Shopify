@@ -3,7 +3,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
-const db = require('./db');
+const { dbLoginUser, dbRegisterUser, dbGetUser, dbUpdateUser, dbUpdateUserWithPassword, dbGetUserAddress, dbGetUserQuery, dbAddUserQuery } = require('./user.repository');
 
 // Middleware to validate JWT token
 const validateToken = (req, res, next) => { 
@@ -29,24 +29,19 @@ router.get('/ping', async (req, res) => {
 
 router.get('/login', async (req, res) => {
   const { email, password } = req.query;
-  const query = 'SELECT * FROM users WHERE email = ?';
-  const params = [email];
   try {
-    const [rows] = await db.query(query, params);
-    if (rows.length > 0) {
-      let isMatch = false;
-      for (const user of rows) {
-        isMatch = await bcrypt.compare(password, user.hashed_password);
-        if (isMatch) {
-            // Generate JWT token
-            const token = jwt.sign({ id: user.id, name: user.Name, email: user.email }, 'your_jwt_secret', { expiresIn: '1h' });
-            return res.status(200).json({ ...user, token });
-        }
-      }
-      if (!isMatch) return res.status(404).json({ message: 'Password is incorrect' });
-    } else {
+    let isMatch = false;
+    const user = await dbLoginUser(email);
+    if (!user) {
       res.status(404).json({ message: 'User not found' });
     }
+    isMatch = await bcrypt.compare(password, user.hashed_password);
+    if (isMatch) {
+        // Generate JWT token
+        const token = jwt.sign({ id: user.id, name: user.Name, email: user.email }, 'your_jwt_secret', { expiresIn: '1h' });
+        return res.status(200).json({ ...user, token });
+    }
+    if (!isMatch) return res.status(404).json({ message: 'Password is incorrect' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -58,9 +53,7 @@ router.post('/register', async (req, res) => {
   const saltRounds = 10;
   try {
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-    const query = 'INSERT INTO users (name, email, hashed_password) VALUES (?, ?, ?)';
-    const params = [name, email, hashedPassword];
-    await db.query(query, params);
+    await dbRegisterUser(name, email, hashedPassword);
     res.status(201).send('User registered successfully');
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -70,9 +63,8 @@ router.post('/register', async (req, res) => {
 // Get user by id
 router.get('/:id', validateToken, async (req, res) => {
   try {
-    const query = 'SELECT id, name, email FROM users WHERE id = ?';
     const params = [req.params.id];
-    const [rows] = await db.query(query, params);
+    const [rows] = await dbGetUser(params);
     if (rows.length > 0) {
       res.status(200).json(rows[0]);
     } else {
@@ -88,14 +80,8 @@ router.put('/:id', validateToken, async (req, res) => {
   const { name } = req.body;
   const { id } = req.params;
   try {
-    const query = 'UPDATE users SET name = ? WHERE id = ?';
-    const params = [name, id];
-    const [result] = await db.query(query, params);
-    if (result.affectedRows > 0) {
-      res.json({ message: 'User updated' });
-    } else {
-      res.status(404).json({ message: 'User not found' });
-    }
+    const [result] = await dbUpdateUser(id, name);
+    res.json({ message: 'User updated' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -108,14 +94,9 @@ router.put('/password/:id', validateToken, async (req, res) => {
   const saltRounds = 10;
   try {
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-    const query = 'UPDATE users SET name = ?, hashed_password = ? WHERE id = ?';
-    const params = [name, hashedPassword, id];
-    const [result] = await db.query(query, params);
-    if (result.affectedRows > 0) {
-      res.json({ message: 'User updated' });
-    } else {
-      res.status(404).json({ message: 'User not found' });
-    }
+    await dbUpdateUserWithPassword(id, name, hashedPassword);
+    console.log('User updated');
+    res.json({ message: 'User updated' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -125,9 +106,7 @@ router.put('/password/:id', validateToken, async (req, res) => {
 router.get('/address/:user_id', validateToken, async (req, res) => {
   const { user_id } = req.params;
   try {
-      const query = 'SELECT * FROM shipping_address WHERE user_id = ?';
-      const params = [user_id];
-      const [rows] = await db.query(query, params);
+      const [rows] = await dbGetUserAddress(user_id);
       if (rows.length === 0) {
         res.status(200).json([]);
       } else {
@@ -142,10 +121,8 @@ router.get('/address/:user_id', validateToken, async (req, res) => {
 router.get('/query/:user_id', validateToken, async (req, res) => {
   const { user_id } = req.params;
   try {
-      const query = 'SELECT * FROM user_query WHERE user_id = ?';
-      const params = [user_id];
-      const [rows] = await db.query(query, params);
-      if (rows.length === 0) {
+    const [rows] = await dbGetUserQuery(user_id);
+    if (rows.length === 0) {
         res.status(200).json([]);
       } else {
         res.status(200).json(rows);
@@ -158,20 +135,9 @@ router.get('/query/:user_id', validateToken, async (req, res) => {
 // Add a query
 router.post('/query', validateToken, async (req, res) => {
   const { user_id, company, category, major_conditions, minor_conditions } = req.body;
-
   try {
-    let query = 'DELETE FROM user_query WHERE user_id = ?';
-    let params = [user_id];
-    let [result] = await db.query(query, params);
-    query = 'INSERT INTO user_query (user_id, company, category, major_conditions, minor_conditions) VALUES (?, ?, ?, ?, ?)';
-    params = [user_id, company, category, major_conditions, minor_conditions];
-    [result] = await db.query(query, params);
-    if (result.affectedRows > 0) {
-      res.status(201).json({ message: 'query added successfully' });
-    } else {
-      console.log(result);
-      res.status(500).json({ message: 'Failed to add address' });
-    }
+    await dbAddUserQuery(user_id, company, category, major_conditions, minor_conditions);
+    res.status(201).json({ message: 'query added successfully' });
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: err.message });

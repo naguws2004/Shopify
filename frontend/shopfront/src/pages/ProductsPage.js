@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Cookies from 'js-cookie';
+import { getCookie } from '../common/cookieManager';
+import { encryptString } from '../common/encryptionManager';
 import ProductsComponent from '../components/Products';
 import { saveCart } from '../services/cartService';
 import { getProducts } from '../services/productService';
@@ -43,42 +44,41 @@ function ProductsPage() {
   }, [filterText]);
 
   useEffect(() => {
-    const userInfo = Cookies.get('userInfo');
+    const userInfo = getCookie('userInfo');
     if (!userInfo) {
-      alert('User is not logged in');
+      alert('User is logging out');
       navigate('/');
       return;
     }
-    const user = JSON.parse(userInfo);
-    setId(user.id);
-    setName(user.name);
-    setToken(user.token);
+    setId(userInfo.id);
+    setName(userInfo.name);
+    setToken(userInfo.token);
     fetchProducts();
   }, [name]);
 
-  // useEffect(() => {
-  //   const handleActivity = () => {
-  //     if (timeoutRef.current) {
-  //       clearTimeout(timeoutRef.current);
-  //     }
-  //     timeoutRef.current = setTimeout(() => {
-  //       handleLogout();
-  //     }, 60000); // 1 minute
-  //   };
+  useEffect(() => {
+    const handleActivity = () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout(() => {
+        handleLogout();
+      }, 300000); // 5 minute
+    };
 
-  //   window.addEventListener('mousemove', handleActivity);
-  //   window.addEventListener('keydown', handleActivity);
+    window.addEventListener('mousemove', handleActivity);
+    window.addEventListener('keydown', handleActivity);
 
-  //   handleActivity(); // Initialize the timeout
+    handleActivity(); // Initialize the timeout
 
-  //   return () => {
-  //     if (timeoutRef.current) {
-  //       clearTimeout(timeoutRef.current);
-  //     }
-  //     window.removeEventListener('mousemove', handleActivity);
-  //     window.removeEventListener('keydown', handleActivity);
-  //   };
-  // }, []);
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      window.removeEventListener('mousemove', handleActivity);
+      window.removeEventListener('keydown', handleActivity);
+    };
+  }, []);
 
   const handleFilterTextChange = (e) => {
     setFilterText(e.target.value);
@@ -89,9 +89,8 @@ function ProductsPage() {
   };
 
   const handleLogout = () => {
-    handleReset();
-    Cookies.remove('userInfo'); // Remove the cookie when the component mounts
-    window.history.back();
+    alert('User is logging out');
+    navigate('/');
   };
 
   const handleSettings = () => {
@@ -105,7 +104,8 @@ function ProductsPage() {
   };
  
   const handleShowDetails = (id) => {
-    navigate(`/product/${id}`);
+    const encryptedId = encryptString(id.toString());
+    navigate(`/product/${encryptedId}`);
   };
   
   const handleResetCart = () => {

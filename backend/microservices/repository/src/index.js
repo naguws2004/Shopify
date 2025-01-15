@@ -1,24 +1,20 @@
 const express = require('express');
 const cors = require('cors');
-const orderRouter = require('./order.service'); 
+const userRepositoryRouter = require('./userRepository.service'); 
 const swaggerSetup = require('./swagger');
-const kafkaSetup = require('./order.eventConsumer');
 
 const app = express();
-const port = 5005; // Replace with your desired port
+const port = 5099; // Replace with your desired port
 
 // Enable CORS for all origins
 app.use(cors());
 
 app.use(express.json()); // Parse incoming JSON requests
-app.use('/api/orders', orderRouter);
+app.use('/api/userRepository', userRepositoryRouter); 
 
 // Setup Swagger
 swaggerSetup(app);
 
-// Start Kafka consumer
-kafkaSetup();
-
 app.listen(port, () => {
-  console.log(`Order Service listening on port ${port}`);
+  console.log(`Repository Service listening on port ${port}`);
 });

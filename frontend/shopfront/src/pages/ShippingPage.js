@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Cookies from 'js-cookie';
+import { getCookie } from '../common/cookieManager';
+import { encryptString } from '../common/encryptionManager';
 import ShippingComponent from '../components/Shipping';
 import { getAddressById } from '../services/userService';
 import { createOrder, createOrderDetail, addOrderAddressById } from '../services/orderService';
@@ -17,7 +18,7 @@ function ShippingPage() {
   const [pincode, setPincode] = useState('');
   const [contactno, setContactno] = useState('');
   const navigate = useNavigate();
-
+  
   const fetchAddress = async () => {
     try {
       const address = await getAddressById(token, id);
@@ -35,16 +36,15 @@ function ShippingPage() {
 
   useEffect(() => {
     const checkUser = async () => {
-      const userInfo = Cookies.get('userInfo');
+      const userInfo = getCookie('userInfo');
       if (!userInfo) {
-        alert('User is not logged in');
+        alert('User is logging out');
         navigate('/');
         return;
       }
-      const user = JSON.parse(userInfo);
-      setId(user.id);
-      setName(user.name);
-      setToken(user.token);
+      setId(userInfo.id);
+      setName(userInfo.name);
+      setToken(userInfo.token);
       setAddress('');
       setCity('');
       setState('');
@@ -84,21 +84,24 @@ function ShippingPage() {
     try {
       const result = await createOrder(token, id);
       const fetchedCart = await getCartByUserId(token, id);
-      for (const element of fetchedCart) {
-        await createOrderDetail(token, result.order_id, element.product_id);
-      }
+      const product_ids = [];
+      for(const element of fetchedCart) {
+        product_ids.push(element.product_id);
+      };
+      await createOrderDetail(token, result.order_id, product_ids);
       await addOrderAddressById(token, result.order_id, address, city, state, pincode, contactno);
       alert('Order created successfully');
       setError('');
-      navigate(`/order/${result.order_id}`);
+      const encryptedId = encryptString(result.order_id.toString());
+      navigate(`/order/${encryptedId}`);
     } catch (err) {
       setError(err.message);
     }
   };
 
   const handleLogout = () => {
-    Cookies.remove('userInfo'); // Remove the cookie when the component mounts
-    window.history.back();
+    alert('User is logging out');
+    navigate('/');
   };
 
   const handleSettings = () => {

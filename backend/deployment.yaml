@@ -46,3 +46,10 @@ spec:
 
 # kubectl apply -f deployment.yaml        
 # kubectl port-forward shopify-app-pod 5000:5000 5001:5001 5002:5002 5003:5003 5004:5004 5005:5005
+
+# docker run -p 5000:5000 naguws2004/apigateway:latest
+# docker run -p 5001:5001 naguws2004/userservice:latest
+# docker run -p 5002:5002 naguws2004/productservice:latest
+# docker run -p 5003:5003 naguws2004/inventoryservice:latest
+# docker run -p 5004:5004 naguws2004/cartservice:latest
+# docker run -p 5005:5005 naguws2004/orderservice:latest

@@ -27,9 +27,9 @@ const Orders = () => {
 
   const fetchOrders = async () => {
     if (action === 'cancel') {
-      setFilterStatus('PENDING');
+      setFilterStatus('CONFIRMED');
     } else if (action === 'pay') {
-      setFilterStatus('PENDING');
+      setFilterStatus('CONFIRMED');
     } else if (action === 'dispatch') {
       setFilterStatus('PAID');
     } else if (action === 'return') {

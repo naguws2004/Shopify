@@ -74,10 +74,10 @@ function Orders({name, filterOrderId, handleFilterOrderIdChange, filterStatus, h
                   <td colSpan="2">
                     <br />
                     <button onClick={handleReset}>Reset</button>
-                    {order.status === 'PENDING' && (
+                    {order.status === 'CONFIRMED' && (
                       <button onClick={handleOrderPay} disabled={!isUpdateMode}>Make Payment</button>
                     )}
-                    {(order.status === 'PENDING' || order.status === 'PAID') && (
+                    {(order.status === 'CONFIRMED' || order.status === 'PAID') && (
                       <button onClick={handleOrderCancel} disabled={!isUpdateMode}>Cancel</button> 
                     )}
                     {(order.status === 'DISPATCHED') && (
