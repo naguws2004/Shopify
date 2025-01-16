@@ -64,7 +64,7 @@ router.post('/register', async (req, res) => {
 router.get('/:id', validateToken, async (req, res) => {
   try {
     const params = [req.params.id];
-    const [rows] = await dbGetUser(params);
+    const rows = await dbGetUser(params);
     if (rows.length > 0) {
       res.status(200).json(rows[0]);
     } else {
@@ -80,7 +80,7 @@ router.put('/:id', validateToken, async (req, res) => {
   const { name } = req.body;
   const { id } = req.params;
   try {
-    const [result] = await dbUpdateUser(id, name);
+    const result = await dbUpdateUser(id, name);
     res.json({ message: 'User updated' });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -106,7 +106,7 @@ router.put('/password/:id', validateToken, async (req, res) => {
 router.get('/address/:user_id', validateToken, async (req, res) => {
   const { user_id } = req.params;
   try {
-      const [rows] = await dbGetUserAddress(user_id);
+      const rows = await dbGetUserAddress(user_id);
       if (rows.length === 0) {
         res.status(200).json([]);
       } else {
@@ -121,12 +121,12 @@ router.get('/address/:user_id', validateToken, async (req, res) => {
 router.get('/query/:user_id', validateToken, async (req, res) => {
   const { user_id } = req.params;
   try {
-    const [rows] = await dbGetUserQuery(user_id);
+    const rows = await dbGetUserQuery(user_id);
     if (rows.length === 0) {
-        res.status(200).json([]);
-      } else {
-        res.status(200).json(rows);
-      }
+      res.status(200).json([]);
+    } else {
+      res.status(200).json(rows);
+    }
   } catch (err) {
       res.status(500).json({ message: err.message });
   }
@@ -139,7 +139,6 @@ router.post('/query', validateToken, async (req, res) => {
     await dbAddUserQuery(user_id, company, category, major_conditions, minor_conditions);
     res.status(201).json({ message: 'query added successfully' });
   } catch (err) {
-    console.log(err);
     res.status(500).json({ message: err.message });
   }
 });

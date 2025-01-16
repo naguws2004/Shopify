@@ -1,5 +1,5 @@
 const { Kafka } = require('kafkajs');
-const db = require('./db');
+const { dbInternalUpdateOrder } = require('./order.repository');
 
 module.exports = async () => {
   const kafka = new Kafka({
@@ -19,36 +19,12 @@ module.exports = async () => {
     await consumer.run({
       eachMessage: async ({ topic, partition, message, heartbeat, pause }) => {
         console.log(`Received message on topic ${topic}:`, message.value.toString());
-
         const data = JSON.parse(message.value.toString());
-
-        if (topic === 'confirm-order') {
-          const { order_id, action } = data;
-          try {
-            if (action === 'cart') {
-              const query = 'UPDATE orders SET internal_update = REPLACE(internal_update, \'{cart_deleted}\', \'\')  WHERE id = ?';
-              const params = [order_id];
-              await db.query(query, params);
-            } else if (action === 'inventory') {
-              const query = 'UPDATE orders SET internal_update = REPLACE(internal_update, \'{inventory-reduced}\', \'\') WHERE id = ?';
-              const params = [order_id];
-              await db.query(query, params);
-            }
-          } catch (err) {
-            console.error('Failed to update order:', err);
-          }
-        }
-        else if (topic === 'cancel-order') {
-          const { order_id, action } = data;
-          try {
-            if (action === 'inventory') {
-              const query = 'UPDATE orders SET internal_update = REPLACE(internal_update, \'{inventory-increased}\', \'\')  WHERE id = ?';
-              const params = [order_id];
-              await db.query(query, params);
-            } 
-          } catch (err) {
-            console.error('Failed to update order:', err);
-          }
+        const { order_id, action } = data;
+        try {
+          await dbInternalUpdateOrder(order_id, topic, action);
+        } catch (err) {
+          console.error('Failed to update order:', err);
         }
       }
     });

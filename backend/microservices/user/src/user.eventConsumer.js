@@ -1,5 +1,5 @@
 const { Kafka } = require('kafkajs');
-const db = require('./db');
+const { dbAddUserAddress } = require('./user.repository');
 
 module.exports = async () => {
     const kafka = new Kafka({
@@ -24,12 +24,7 @@ module.exports = async () => {
                 if (topic === 'update-address') {
                     const { user_id, address, city, state, pincode, contactno } = data;
                     try {
-                        let query = 'DELETE FROM shipping_address WHERE user_id = ?';
-                        let params = [user_id];
-                        await db.query(query, params);
-                        query = 'INSERT INTO shipping_address(user_id, address, city, state, pincode, contactno) VALUES (?, ?, ?, ?, ?, ?)';
-                        params = [user_id, address, city, state, pincode, contactno];
-                        await db.query(query, params);
+                        await dbAddUserAddress(user_id, address, city, state, pincode, contactno);
                         console.log(`Address updated for user_id: ${user_id}`);
                     } catch (err) {
                         console.error('Failed to update address:', err);

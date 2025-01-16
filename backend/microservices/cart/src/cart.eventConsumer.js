@@ -1,5 +1,5 @@
 const { Kafka } = require('kafkajs');
-const db = require('./db');
+const { dbDeleteCart } = require('./cart.repository');
 const { confirmOrder } = require('./cart.eventProducer');
 
 module.exports = async () => {
@@ -25,9 +25,7 @@ module.exports = async () => {
                 if (topic === 'delete-cart') {
                     const { order_id, user_id } = data;
                     try {
-                        const query = 'DELETE FROM cart WHERE user_id = ?';
-                        const params = [user_id];
-                        await db.query(query, params);
+                        await dbDeleteCart(user_id);
                         await confirmOrder(order_id, 'cart');
                         console.log(`Cart deleted for user_id: ${user_id}`);
                     } catch (err) {

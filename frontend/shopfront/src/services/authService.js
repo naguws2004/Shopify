@@ -19,7 +19,6 @@ export const login = async (email, password) => {
     const response = await axios.get(`${API_URL_USERS}/login?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`);
     return response.data;
   } catch (error) {
-    alert(error);
     throw new Error('Login failed');
   }
 };

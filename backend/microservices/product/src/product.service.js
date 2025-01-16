@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const db = require('./db');
+const { dbGetProducts, dbGetProduct, dbAddProduct, dbUpdateProduct, dbDeleteProduct } = require('./product.repository');
 
 // Middleware to validate JWT token
 const validateToken = (req, res, next) => { 
@@ -11,7 +11,6 @@ const validateToken = (req, res, next) => {
   if (!token) {
       return res.sendStatus(401); // Unauthorized
   }
-
   jwt.verify(token, 'your_jwt_secret', (err, user) => {
       if (err) {
         return res.sendStatus(403); // Forbidden
@@ -36,26 +35,9 @@ router.get('/', validateToken, async (req, res) => {
   const filterText = req.query.filterText ? `%${req.query.filterText.toLowerCase()}%` : '%';
   const includeQty = req.query.includeQty || false;
   const offset = (page - 1) * limit;
-
   try {
-    let rows;
-    let countResult;
-    if (includeQty) {
-      [rows] = await db.query('SELECT * FROM products WHERE inventory > 0 AND LOWER(name) LIKE ? AND LOWER(company) LIKE ? AND LOWER(category) LIKE ? AND LOWER(major_conditions) LIKE ? AND LOWER(minor_conditions) LIKE ? ORDER BY name LIMIT ? OFFSET ?', [filterText, company, category, majorConditions, minorConditions, limit, offset]);
-      [countResult] = await db.query('SELECT COUNT(*) as count FROM products WHERE inventory > 0 AND LOWER(name) LIKE ? AND LOWER(company) LIKE ? AND LOWER(category) LIKE ? AND LOWER(major_conditions) LIKE ? AND LOWER(minor_conditions) LIKE ?', [filterText, company, category, majorConditions, minorConditions]);
-    } else {
-      [rows] = await db.query('SELECT * FROM products WHERE LOWER(name) LIKE ? AND LOWER(company) LIKE ? AND LOWER(category) LIKE ? AND LOWER(major_conditions) LIKE ? AND LOWER(minor_conditions) LIKE ? ORDER BY name LIMIT ? OFFSET ?', [filterText, company, category, majorConditions, minorConditions, limit, offset]);
-      [countResult] = await db.query('SELECT COUNT(*) as count FROM products WHERE LOWER(name) LIKE ? AND LOWER(company) LIKE ? AND LOWER(category) LIKE ? AND LOWER(major_conditions) LIKE ? AND LOWER(minor_conditions) LIKE ?', [filterText, company, category, majorConditions, minorConditions]);
-    }
-    const totalItems = countResult[0].count;
-    const totalPages = Math.ceil(totalItems / limit);
-
-    res.json({
-      products: rows,
-      total: totalItems,
-      page: page,
-      pages: totalPages
-    });
+    const result = await dbGetProducts(page, limit, company, category, majorConditions, minorConditions, filterText, includeQty, offset);
+    res.json(result);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -64,11 +46,11 @@ router.get('/', validateToken, async (req, res) => {
 // Get product by id
 router.get('/:id', validateToken, async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM products WHERE id = ?', [req.params.id]);
-    if (rows.length > 0) {
-      res.json(rows[0]);
-    } else {
+    const row = await dbGetProduct(req.params.id);
+    if (!row) {
       res.status(404).json({ message: 'Product not found' });
+    } else {
+      res.json(row);
     }
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -81,7 +63,7 @@ router.post('/', validateToken, async (req, res) => {
     ...req.body,
   };
   try {
-    await db.query('INSERT INTO products SET ?', newProduct);
+    await dbAddProduct(newProduct);
     res.status(201).json(newProduct);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -91,8 +73,8 @@ router.post('/', validateToken, async (req, res) => {
 // Update a product
 router.put('/:id', validateToken, async (req, res) => {
   try {
-    const [result] = await db.query('UPDATE products SET ? WHERE id = ?', [req.body, req.params.id]);
-    if (result.affectedRows > 0) {
+    const result = await dbUpdateProduct(req.params.id, req.body);
+    if (result) {
       res.json({ message: 'Product updated' });
     } else {
       res.status(404).json({ message: 'Product not found' });
@@ -105,8 +87,8 @@ router.put('/:id', validateToken, async (req, res) => {
 // Delete a product
 router.delete('/:id', validateToken, async (req, res) => {
   try {
-    const [result] = await db.query('DELETE FROM products WHERE id = ?', [req.params.id]);
-    if (result.affectedRows > 0) {
+    const result = await dbDeleteProduct(req.params.id);
+    if (result) {
       res.json({ message: 'Product deleted' });
     } else {
       res.status(404).json({ message: 'Product not found' });

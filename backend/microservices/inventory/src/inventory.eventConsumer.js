@@ -1,5 +1,5 @@
 const { Kafka } = require('kafkajs');
-const db = require('./db');
+const { dbreduceInventory, dbIncreaseInventory, dbReduceInventory } = require('./inventory.repository');
 const { confirmOrder, cancelOrder } = require('./inventory.eventProducer');
 
 module.exports = async () => {
@@ -27,9 +27,7 @@ module.exports = async () => {
           const { order_id, product_ids } = data;
           try {
             for (const product_id of product_ids) {
-              const query = 'UPDATE products SET inventory = inventory - 1 WHERE id = ?';
-              const params = [product_id];
-              await db.query(query, params);
+              await dbReduceInventory(product_id);
               console.log(`Inventory reduced for product_id: ${product_id}`);
             }
             await confirmOrder(order_id, 'inventory');
@@ -40,9 +38,7 @@ module.exports = async () => {
           const { order_id, product_ids } = data;
           try {
             for (const product_id of product_ids) {
-              const query = 'UPDATE products SET inventory = inventory + 1 WHERE id = ?';
-              const params = [product_id];
-              await db.query(query, params);
+              await dbIncreaseInventory(product_id);
               console.log(`Inventory increased for product_id: ${product_id}`);
             }
             await cancelOrder(order_id, 'inventory');

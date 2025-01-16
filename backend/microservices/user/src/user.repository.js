@@ -1,103 +1,147 @@
 // user.repository.js
-const axios = require('axios');
-const url = 'http://localhost:5099/api/userRepository/';
+const db = require('./db');
 
 const dbLoginUser = async (email) => {
   try {
-    const response = await axios.get(url + 'login', {
-      params: {
-        email: email
-      }
-    });
-    return response.data;
+    const query = 'SELECT * FROM users WHERE email = ?';
+    const params = [email];
+    const [rows] = await db.query(query, params);
+    if (rows.length > 0) {
+      return rows[0];
+    } else {
+      return undefined;
+    }
   } catch (error) {
-    console.error('Error in external API:', error);
+    console.error('Error in database call:', error);
     throw error;
   }
 }
 
 const dbRegisterUser = async (name, email, hashedPassword) => {
   try {
-    await axios.post(url + 'register', {
-      name: name,
-      email: email,
-      hashedPassword: hashedPassword
-    });
+    const query = 'INSERT INTO users (name, email, hashed_password) VALUES (?, ?, ?)';
+    const params = [name, email, hashedPassword];
+    await db.query(query, params);
   } catch (error) {
-    console.error('Error in external API:', error);
+    console.error('Error in database call:', error);
     throw error;
   }
 }
 
 const dbGetUser = async (id) => {
   try {
-    const response = await axios.get(url + `${id}`);
-    return response.data;
+    const query = 'SELECT id, name, email FROM users WHERE id = ?';
+    const params = [id];
+    const [rows] = await db.query(query, params);
+    if (rows.length > 0) {
+      return rows[0];
+    } else {
+      return undefined;
+    }
   } catch (error) {
-    console.error('Error in external API:', error);
+    console.error('Error in database call:', error);
     throw error;
   }
 }
 
 const dbUpdateUser = async (id, name) => {
   try {
-    const response = await axios.put(url + `${id}`, {
-      name: name
-    });
-    return response.data;
+    const query = 'UPDATE users SET name = ? WHERE id = ?';
+    const params = [name, id];
+    const [result] = await db.query(query, params);
+    if (result.affectedRows > 0) {
+      return true;
+    } else {
+      return false;
+    }
   } catch (error) {
-    console.error('Error in external API:', error);
+    console.error('Error in database call:', error);
     throw error;
   }
 }
 
 const dbUpdateUserWithPassword = async (id, name, hashedPassword) => {
   try {
-    console.log('id:', id);
-    console.log('name:', name);
-    console.log('hashedPassword:', hashedPassword);
-    const response = await axios.put(url + 'password/' + `${id}`, {
-      name: name,
-      hashedPassword: hashedPassword
-    });
-    return response.data;
+    const query = 'UPDATE users SET name = ?, hashed_password = ? WHERE id = ?';
+    const params = [name, hashedPassword, id];
+    const [result] = await db.query(query, params);
+    if (result.affectedRows > 0) {
+      return true;
+    } else {
+      return false;
+    }
   } catch (error) {
-    console.error('Error in external API:', error);
+    console.error('Error in database call:', error);
     throw error;
   }
 }
 
-const dbGetUserAddress = async (id) => {
+const dbGetUserAddress = async (user_id) => {
   try {
-    const response = await axios.get(url + 'address/' + `${id}`);
-    return response.data;
+    const query = 'SELECT * FROM shipping_address WHERE user_id = ?';
+    const params = [user_id];
+    const [rows] = await db.query(query, params);
+    if (rows.length === 0) {
+      return [];
+    } else {
+      return rows;
+    }
   } catch (error) {
-    console.error('Error in external API:', error);
+    console.error('Error in database call:', error);
     throw error;
   }
 }
 
-const dbGetUserQuery = async (id) => {
+const dbGetUserQuery = async (user_id) => {
   try {
-    const response = await axios.get(url + 'query/' + `${id}`);
-    return response.data;
+    const query = 'SELECT * FROM user_query WHERE user_id = ?';
+    const params = [user_id];
+    const [rows] = await db.query(query, params);
+    if (rows.length === 0) {
+      return [];
+    } else {
+      return rows;
+    }
   } catch (error) {
-    console.error('Error in external API:', error);
+    console.error('Error in database call:', error);
+    throw error;
+  }
+}
+
+const dbAddUserAddress = async (user_id, address, city, state, pincode, contactno) => {
+  try {
+    let query = 'DELETE FROM shipping_address WHERE user_id = ?';
+    let params = [user_id];
+    await db.query(query, params);
+    query = 'INSERT INTO shipping_address(user_id, address, city, state, pincode, contactno) VALUES (?, ?, ?, ?, ?, ?)';
+    params = [user_id, address, city, state, pincode, contactno];
+    [result] = await db.query(query, params);
+    if (result.affectedRows > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    console.error('Error in database call:', error);
     throw error;
   }
 }
 
 const dbAddUserQuery = async (user_id, company, category, major_conditions, minor_conditions) => {
   try {
-    await axios.post(url + 'query', {
-      user_id: user_id,
-      company: company,
-      category: category,
-      major_conditions: major_conditions,
-      minor_conditions: minor_conditions
-    });
+    let query = 'DELETE FROM user_query WHERE user_id = ?';
+    let params = [user_id];
+    let [result] = await db.query(query, params);
+    query = 'INSERT INTO user_query (user_id, company, category, major_conditions, minor_conditions) VALUES (?, ?, ?, ?, ?)';
+    params = [user_id, company, category, major_conditions, minor_conditions];
+    [result] = await db.query(query, params);
+    if (result.affectedRows > 0) {
+      return true;
+    } else {
+      return false;
+    }
   } catch (error) {
-    console.error('Error in external API:', error);
+    console.error('Error in database call:', error);
     throw error;
   }
 }
@@ -110,5 +154,6 @@ module.exports = {
   dbUpdateUserWithPassword,
   dbGetUserAddress,
   dbGetUserQuery,
+  dbAddUserAddress,
   dbAddUserQuery
 };

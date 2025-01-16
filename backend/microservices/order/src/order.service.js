@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const db = require('./db');
+const { dbGetOrders, dbGetOrder, dbGetOrderDetails, dbAddOrder, dbAddOrderDetails, dbAddOrderAddress, dbPayOrder, dbCancelOrder, dbReturnOrder } = require('./order.repository');
 const { reduceInventory, increaseInventory, updateAddress, deleteCart, confirmUpdate, startTimer } = require('./order.eventProducer');
 
 // Middleware to validate JWT token
@@ -33,25 +33,9 @@ router.get('/', validateToken, async (req, res) => {
   const filterText = req.query.filterText ? `%${req.query.filterText.toLowerCase()}%` : '%';
   const filterStatus = req.query.filterStatus ? `%${req.query.filterStatus.toLowerCase()}%` : '%';
   const offset = (page - 1) * limit;
-
   try {
-    let rows;
-    let countResult;
-    if (filterOrderId) {
-      [rows] = await db.query('SELECT o.id, order_date, name, email, payment_date, dispatch_date, cancelled_date, status FROM orders o INNER JOIN users u ON o.user_id = u.id WHERE u.id = ? AND o.id = ? AND LOWER(name) LIKE ? AND UPPER(status) LIKE ? ORDER BY order_date DESC, o.id LIMIT ? OFFSET ?', [id, filterOrderId, filterText, filterStatus, limit, offset]);
-      [countResult] = await db.query('SELECT COUNT(*) as count FROM orders o INNER JOIN users u ON o.user_id = u.id WHERE u.id = ? AND o.id = ? AND LOWER(name) LIKE ? AND UPPER(status) LIKE ?', [id, filterOrderId, filterText, filterStatus]);
-    } else {
-      [rows] = await db.query('SELECT o.id, order_date, name, email, payment_date, dispatch_date, cancelled_date, status FROM orders o INNER JOIN users u ON o.user_id = u.id WHERE u.id = ? AND LOWER(name) LIKE ? AND UPPER(status) LIKE ? ORDER BY order_date DESC, o.id LIMIT ? OFFSET ?', [id, filterText, filterStatus, limit, offset]);
-      [countResult] = await db.query('SELECT COUNT(*) as count FROM orders o INNER JOIN users u ON o.user_id = u.id WHERE u.id = ? AND LOWER(name) LIKE ? AND UPPER(status) LIKE ?', [id, filterText, filterStatus]);
-    }
-    const totalItems = countResult[0].count;
-    const totalPages = Math.ceil(totalItems / limit);
-    res.json({
-      orders: rows,
-      total: totalItems,
-      page: page,
-      pages: totalPages
-    });
+    const result = await dbGetOrders(id, page, limit, filterOrderId, filterText, filterStatus, offset);
+    res.json(result);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -61,9 +45,7 @@ router.get('/', validateToken, async (req, res) => {
 router.get('/:order_id', validateToken, async (req, res) => {
     const { order_id } = req.params;
     try {
-        const query = 'SELECT * FROM orders WHERE id = ?';
-        const params = [order_id];
-        const [rows] = await db.query(query, params);
+        const rows = await dbGetOrder(order_id);
         res.status(200).json(rows);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -74,9 +56,7 @@ router.get('/:order_id', validateToken, async (req, res) => {
 router.get('/details/:order_id', validateToken, async (req, res) => {
   const { order_id } = req.params;
   try {
-      const query = 'SELECT * FROM order_details o INNER JOIN products p ON o.product_id = p.id WHERE o.id = ?';
-      const params = [order_id];
-      const [rows] = await db.query(query, params);
+      const rows = await dbGetOrderDetails(order_id);
       res.status(200).json(rows);
   } catch (err) {
       res.status(500).json({ message: err.message });
@@ -87,11 +67,9 @@ router.get('/details/:order_id', validateToken, async (req, res) => {
 router.post('/', validateToken, async (req, res) => {
   const { user_id } = req.body;
   try {
-    const query = 'INSERT INTO orders (order_date, user_id, status, internal_update) VALUES (CURDATE(), ?, \'PENDING CONFIRMATION\', \'{cart_deleted}{products_added}{inventory-reduced}{address_added}\')';  
-    const params = [user_id];
-    const [result] = await db.query(query, params);
-    if (result.affectedRows > 0) {
-      const order_id = result.insertId;
+    const result = await dbAddOrder(user_id);
+    if (result > 0) {
+      const order_id = result;
       res.status(201).json({ message: 'order added successfully', order_id });
     } else {
       res.status(500).json({ message: 'Failed to add order' });
@@ -105,16 +83,7 @@ router.post('/', validateToken, async (req, res) => {
 router.post('/detail', validateToken, async (req, res) => {
   const { order_id, product_ids } = req.body;
   try {
-    const query = 'INSERT INTO order_details (id, product_id) VALUES (?, ?)';
-    let success = true;
-    for (const product_id of product_ids) {
-      const params = [order_id, product_id];
-      const [result] = await db.query(query, params);
-      if (result.affectedRows <= 0) {
-        success = false;
-        break;
-      }
-    }
+    const success = await dbAddOrderDetails(order_id, product_ids);
     if (success) {
       await confirmUpdate(order_id, 'products');
       await reduceInventory(order_id, product_ids);
@@ -133,10 +102,8 @@ router.post('/detail', validateToken, async (req, res) => {
 router.post('/address', validateToken, async (req, res) => {
   const { order_id, address, city, state, pincode, contactno } = req.body;
   try {
-    const query = 'INSERT INTO order_shipping_address (order_id, address, city, state, pincode, contactno) VALUES (?, ?, ?, ?, ?, ?)';
-    const params = [order_id, address, city, state, pincode, contactno];
-    const [result] = await db.query(query, params);
-    if (result.affectedRows > 0) {
+    const result = await dbAddOrderAddress(order_id, address, city, state, pincode, contactno);
+    if (result) {
       await confirmUpdate(order_id, 'address');
       await updateAddress(order_id, address, city, state, pincode, contactno);
       res.status(201).json({ message: 'address added successfully' });
@@ -154,10 +121,8 @@ router.post('/address', validateToken, async (req, res) => {
 router.put('/pay/:order_id', validateToken, async (req, res) => {
   const { order_id } = req.params;
   try {
-    const params = [order_id];
-    const query = 'UPDATE orders SET payment_date = CURDATE(), status = \'PENDING PAID\' WHERE id = ?';
-    const [result] = await db.query(query, params);
-    if (result.affectedRows > 0) {
+    const result = await dbPayOrder(order_id);
+    if (result) {
       await startTimer(30000, order_id);
       res.status(200).json({ message: 'order updated successfully' });
     } else {
@@ -172,10 +137,8 @@ router.put('/pay/:order_id', validateToken, async (req, res) => {
 router.put('/cancel/:order_id', validateToken, async (req, res) => {
   const { order_id } = req.params;
   try {
-    const params = [order_id];
-    const query = 'UPDATE orders SET cancelled_date = CURDATE(), status = \'PENDING CANCELLATION\', internal_update = CONCAT(internal_update, \'{inventory-increased}\') WHERE id = ?';
-    const [result] = await db.query(query, params);
-    if (result.affectedRows > 0) {
+    const result = await dbCancelOrder(order_id);
+    if (result) {
       await increaseInventory(order_id);
       await startTimer(30000, order_id);
       res.status(200).json({ message: 'order updated successfully' });
@@ -191,10 +154,8 @@ router.put('/cancel/:order_id', validateToken, async (req, res) => {
 router.put('/return/:order_id', validateToken, async (req, res) => {
   const { order_id } = req.params;
   try {
-    const params = [order_id];
-    const query = 'UPDATE orders SET cancelled_date = CURDATE(), status = \'PENDING RETURN\', internal_update = \'{inventory-increased}\' WHERE id = ?';
-    const [result] = await db.query(query, params);
-    if (result.affectedRows > 0) {
+    const result = await dbReturnOrder(order_id);
+    if (result) {
       await increaseInventory(order_id);
       await startTimer(30000, order_id);
       res.status(200).json({ message: 'order updated successfully' });
